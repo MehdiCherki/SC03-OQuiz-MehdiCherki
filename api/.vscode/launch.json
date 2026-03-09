@@ -1,0 +1,21 @@
+// Config de debug pour les tests (facultatif)
+{
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug TSX Tests",
+      "runtimeExecutable": "tsx",
+      "runtimeArgs": [
+        "--inspect-brk",
+        "--test",
+        "--experimental-test-isolation=none",
+        "--env-file=./test/config/.env.test",
+        "--import", "./test/config/global-setup.ts",
+        "./src/**/*.spec.test.ts"
+      ],
+      "skipFiles": ["<node_internals>/**"],
+      "console": "integratedTerminal"
+    }
+  ]
+}

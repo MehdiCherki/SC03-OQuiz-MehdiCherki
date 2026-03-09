@@ -1,0 +1,45 @@
+{
+  "name": "api",
+  "type": "module",
+  "scripts": {
+    "======= Pour la prod =======": "========================",
+    "start": "node dist/index.js",
+    "build": "tsc",
+    "docker:start": "npm run db:migrate:deploy && npm run start",
+    "======= Pour le dev ========": "========================",
+    "dev": "tsx --watch --env-file=.env index.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "======= Pour la BDD ========": "========================",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:migrate:reset": "prisma migrate reset --force",
+    "db:generate": "prisma generate",
+    "db:seed": "tsx --env-file=.env ./src/models/seeding.ts",
+    "db:reset": "npm run db:migrate:reset && npm run db:seed",
+    "db:studio": "prisma studio",
+    "======= Pour les tests ========": "=====================",
+    "test:unit": "tsx --test ./**/*.unit.test.ts",
+    "test:spec": "tsx --test --env-file=./test/config/.env.test --import ./test/config/global-setup.ts --experimental-test-isolation=none ./**/*.spec.test.ts",
+    "test": "npm run test:unit && npm run test:spec"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.11.1",
+    "@types/cors": "^2.8.19",
+    "axios": "^1.10.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "zod": "^4.0.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.31.0",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.0.12",
+    "eslint": "^9.31.0",
+    "husky": "^9.1.7",
+    "prisma": "^6.11.1",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.37.0"
+  }
+}

@@ -1,0 +1,22 @@
+# Pour que ce script se lance automatiquement à chaque commit, il faut : 
+# - Le rendre exécutable
+#      chmod +x api/.husky/pre-commit
+# - L'ajouter aux hook git locaux du dépot
+#      git config core.hooksPath api/.husky
+
+# (Note : lié au fait que l'on ait mis husky dans un sous dossier)
+
+
+# Run Linter checks
+npm run lint --prefix api
+     
+# Run API test
+# npm run test --prefix api
+
+# Build API
+# npm run build --prefix api
+
+# Developer Experience (DX) : si le schema.prisma a été modifié, rappeler dev de créer une migration
+# if [ -n "$(git diff --name-only HEAD~1 | grep schema.prisma)" ]; then
+#     echo "⚠️ Le fichier 'schema.prisma' a été modifié. Assure toi d'avoir générer un fichier de migration."
+# fi

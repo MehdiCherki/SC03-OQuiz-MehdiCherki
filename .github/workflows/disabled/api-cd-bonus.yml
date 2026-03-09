@@ -1,0 +1,60 @@
+# Bonus : non demandé dans le challenge, mais pour les curieux !
+# Push automatisé d'une image docker vers le dockerhub
+
+# Nom du workflow
+name: Push API Docker image to DockerHub
+
+# Événement déclencheur
+on:
+  push:
+    branches:
+      - main
+
+# Jobs à exécuter
+jobs:
+  # Nom du job
+  build_and_push_api_image:
+    # Runner
+    runs-on: ubuntu-latest
+
+    # Environnement
+    environment: CI/CD
+
+    # Étapes du job
+    steps:
+      # Récupérer le code du dépôt
+      - name: Checkout code
+        uses: actions/checkout@v4 # v4 est la version actuelle, vérifier la dernière
+
+      # Mettre en place Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22' # Spécifie la version de Node.js
+
+      # Installer les dépendances (commande shell)
+      - name: Install dependencies
+        run: npm install
+
+      # Généer le client Prisma
+      - name: Generate Prisma client
+        run: npm run db:generate --prefix api
+
+      # Exécuter les tests
+      - name: Run tests
+        run: npm run test --prefix api
+
+      # Connexion à DockerHub
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Builder l'image Docker
+      - name: Build Docker image
+        run: docker build -t ${{ vars.DOCKERHUB_USERNAME }}/oquiz-api:latest ./api
+
+      # Pusher l'image Docker
+      - name: Push Docker image
+        run: docker push ${{ vars.DOCKERHUB_USERNAME }}/oquiz-api:latest
