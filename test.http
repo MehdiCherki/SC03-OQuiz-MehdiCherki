@@ -1,0 +1,22 @@
+
+### Register
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "firstname":"Julien",
+  "lastname": "leperse",
+  "email": "juju@questionpourunchampion.fr",
+  "password":"Agdkf94g4sz6zrf!",
+  "confirm":"Agdkf94g4sz6zrf!"
+}
+
+
+### Login
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "juju@questionpourunchampion.fr",
+  "password":"Agdkf94g4sz6zrf!"
+}

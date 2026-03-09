@@ -1,0 +1,35 @@
+@startuml Authentification
+actor User
+participant SPA
+participant API
+database BDD
+
+== Création de compte ==
+User -> SPA : Formulaire d'inscription
+SPA -> API : POST /auth/signup (email, mdp)
+API -> API : Hacher le mot de passe
+API -> BDD : INSERT nouvel utilisateur
+BDD --> API : OK
+API --> SPA : Réponse 201
+SPA --> User : Le compte utilisateur 
+
+== Connexion ==
+User -> SPA : Formulaire de connexion
+SPA -> API : POST /auth/login (email, mdp)
+API -> BDD : SELECT utilisateur (par email)
+BDD --> API : Utilisateur (dont hash du mdp)
+API -> API : Vérifie mdp =~= hash
+API -> API : Génère JWT (payload : userId, role) signé
+API --> SPA : Réponse 200 + JWT
+SPA --> User : L'utilisateur est connecté
+
+== Récupération des infos ==
+User -> SPA : Rechargement
+SPA -> API : GET /auth/me (+ JWT)
+API -> API : Vérifier le JWT (signature, expiration)
+API -> API : Decoder le JWT (userId, role)
+API -> BDD : SELECT utilisateur via userId
+BDD --> API : Données utilisateur
+API --> SPA : Données utilisateur
+SPA --> User : Affiche les infos utilisateur
+@enduml
