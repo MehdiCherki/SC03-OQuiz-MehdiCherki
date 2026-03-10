@@ -3,6 +3,7 @@ import type { Request, Response, NextFunction } from "express";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 import { ForbiddenError, UnauthorizedError } from "../lib/errors.ts";
 import { config } from "../../config.ts";
+import logger from "../lib/logger.ts";
 
 export function checkRoles(roles: Role[]) {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -30,10 +31,10 @@ function extractAccessToken(req: Request) {
 
 function verifyAndDecodeJWT(accessToken: string): JwtPayload {
   try {
-    const payload = jwt.verify(accessToken, config.jwtSecret) as JwtPayload;
+    const payload = jwt.verify(accessToken, config.jwtSecret, { audience: "access" }) as JwtPayload;
     return payload;
   } catch (error) {
-    if (error instanceof Error) console.log(error.message);
+    logger.warn(error);
     throw new UnauthorizedError(
       "Vous n'êtes pas autorisé à accéder à cette resource",
     );

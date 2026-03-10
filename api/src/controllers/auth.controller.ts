@@ -10,6 +10,7 @@ import {
   UnauthorizedError,
 } from "../lib/errors.ts";
 import { generateAuthTokens } from "../lib/tokens.ts";
+import jwt from "jsonwebtoken";
 
 interface Token {
   token: string;
@@ -108,43 +109,26 @@ export async function loginUser(req: Request, res: Response) {
 
 // Me
 export async function getAuthenticatedUser(req: Request, res: Response) {
-  if (req.user) {
-    try {
-      const user = await prisma.user.findFirst({
-        where: { id: req.user.id },
-      });
-      if (!user) {
-        throw new UnauthorizedError(
-          "Vous n'êtes pas autorisé à accéder à cette resource",
-        );
-      }
-      res.json({
-        id: user.id,
-        email: user.email,
-        firstname: user.firstname,
-        lastname: user.lastname,
-        role: user.role,
-        createdAt: user.created_at,
-        updatedAt: user.updated_at,
-      });
-    } catch (error) {
-      if (error instanceof Error) console.log(error.message);
-      throw new UnauthorizedError(
-        "Vous n'êtes pas autorisé à accéder à cette resource",
-      );
-    }
-  } else {
-    throw new UnauthorizedError(
-      "Vous n'êtes pas autorisé à accéder à cette resource",
-    );
+  // req.user est garanti par le middleware checkRoles en amont
+  const user = await prisma.user.findUnique({ where: { id: req.user!.id } });
+  if (!user) {
+    throw new UnauthorizedError("Vous n'êtes pas autorisé à accéder à cette resource");
   }
+  res.json({
+    id: user.id,
+    email: user.email,
+    firstname: user.firstname,
+    lastname: user.lastname,
+    role: user.role,
+    createdAt: user.created_at,
+    updatedAt: user.updated_at,
+  });
 }
 
 // logout
 export async function logoutUser(req: Request, res: Response) {
-  const randomStringToUnsetCookie = Math.random().toString();
-  res.cookie("accessToken", randomStringToUnsetCookie);
-  res.cookie("refreshToken", randomStringToUnsetCookie);
+  res.clearCookie("accessToken");
+  res.clearCookie("refreshToken", { path: "/api/auth/refresh" });
   if (req.user) {
     await prisma.refreshToken.deleteMany({ where: { user_id: req.user.id } });
   }
@@ -155,6 +139,15 @@ export async function refreshAccessToken(req: Request, res: Response) {
   const receivedRefreshToken = req.body?.refreshToken ?? req.cookies.refreshToken;
 
   if (!receivedRefreshToken) {
+    throw new UnauthorizedError(
+      "Vous n'êtes pas autorisé à accéder à cette resource",
+    );
+  }
+
+  // Vérifier la signature JWT avant d'interroger la base de données
+  try {
+    jwt.verify(receivedRefreshToken, config.jwtSecret, { audience: "refresh" });
+  } catch {
     throw new UnauthorizedError(
       "Vous n'êtes pas autorisé à accéder à cette resource",
     );
@@ -188,8 +181,8 @@ export async function refreshAccessToken(req: Request, res: Response) {
 
 function setAccessTokenCookie(res: Response, accessToken: Token) {
   res.cookie("accessToken", accessToken.token, {
-    httpOnly: true, // interdit l'accès au cookie par JS côté client
-    // secure: true // limite l'envoi du cookie au protocole HTTPS
+    httpOnly: true,
+    secure: config.isProd, // HTTPS uniquement en production
     sameSite: "none",
     maxAge: accessToken.expiresIn,
   });
@@ -197,8 +190,8 @@ function setAccessTokenCookie(res: Response, accessToken: Token) {
 
 function setRefreshTokenCookie(res: Response, refreshToken: Token) {
   res.cookie("refreshToken", refreshToken.token, {
-    httpOnly: true, // interdit l'accès au cookie par JS côté client
-    // secure: true // limite l'envoi du cookie au protocole HTTPS
+    httpOnly: true,
+    secure: config.isProd, // HTTPS uniquement en production
     sameSite: "none",
     maxAge: refreshToken.expiresIn,
     path: "/api/auth/refresh",

@@ -10,6 +10,11 @@ import { infoMiddleware } from "./middlewares/info.middleware.ts";
 // Créer une app Express
 export const app = express();
 
+// Faire confiance au proxy nginx (nécessaire pour que req.secure soit correct derrière une terminaison SSL)
+if (config.isProd) {
+  app.set("trust proxy", 1);
+}
+
 // Autoriser les requêtes cross-origin
 app.use(cors({ origin: config.allowedOrigins }));
 

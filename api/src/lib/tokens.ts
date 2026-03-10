@@ -9,12 +9,12 @@ export function generateAuthTokens(user: User) {
     role: user.role,
   };
 
-  const accessToken = jwt.sign(payload, config.jwtSecret, { expiresIn: "15m" });
+  const accessToken = jwt.sign(payload, config.jwtSecret, { expiresIn: "15m", audience: "access" });
   const refreshUniqueId = crypto.randomBytes(128).toString("base64");
   const refreshToken = jwt.sign(
     { refreshId: refreshUniqueId },
     config.jwtSecret,
-    { expiresIn: "7d" },
+    { expiresIn: "7d", audience: "refresh" },
   );
 
   return {

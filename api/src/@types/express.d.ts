@@ -1,4 +1,4 @@
-import { Role } from "@prisma/client";
+import { Role } from "../models/index.ts";
 import { Request } from "express";
 
 // Approche n°1 : on surchage au global ce qu'il se trouve dans Express.Request

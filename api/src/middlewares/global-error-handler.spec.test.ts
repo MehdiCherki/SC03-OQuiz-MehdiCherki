@@ -21,10 +21,8 @@ describe("globalErrorHandler", () => {
 
     // ASSERT
     assert.strictEqual(httpResponse.status, 500);
-    assert.deepStrictEqual(httpResponse.data, {
-      status: 500,
-      error: "Internal server error",
-    });
+    assert.strictEqual(httpResponse.data.status, 500);
+    assert.strictEqual(httpResponse.data.error, "Internal server error");
 
     // CLEAN UP (j'ai pas trouvé mieux pour desactiver le mocking, car la méthode it.mock() ne marche pas avec Prisma qui est bourré de proxy)
     prisma.level.create = safePrismaLevelCreate;

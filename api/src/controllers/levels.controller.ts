@@ -43,7 +43,7 @@ export async function createLevel(req: Request, res: Response) {
 
 export async function updateLevel(req: Request, res: Response) {
   // Récupérer l'ID de level à mettre à jour
-  const levelId = await z.coerce.number().int().min(1).parseAsync(req.params.id);
+  const levelId = await parseIdFromParams(req.params.id);
   
   // Valider le body (name string non nulle) --> sinon 400
   const updateLevelBodySchema = z.object({
@@ -57,20 +57,18 @@ export async function updateLevel(req: Request, res: Response) {
     throw new NotFoundError(`Level not found: ${levelId}`);
   }
 
-  // Vérifier si un level du même nom n'existe pas déjà --> sinon 409
-  const alreadyExistingLevel = await prisma.level.findFirst({ where: { name } });
+  // Vérifier si un level du même nom n'existe pas déjà (en excluant le level courant) --> sinon 409
+  const alreadyExistingLevel = await prisma.level.findFirst({ where: { name, id: { not: levelId } } });
   if (alreadyExistingLevel) {
     throw new ConflictError(`Tag name already taken : ${name}`);
   }
 
-  // Mettre à jour le level en BDD
-  await prisma.level.update({
-    where : { id :levelId }, 
-    data: { name, updated_at: new Date() } }
-  );
+  // Mettre à jour le level en BDD et récupérer directement le résultat
+  const updatedLevel = await prisma.level.update({
+    where: { id: levelId },
+    data: { name, updated_at: new Date() },
+  });
 
-  // Renvoyer le niveau mis à jour (potentiellement aller le récupérer avant)
-  const updatedLevel = await prisma.level.findFirst({ where: { id: levelId } });
   res.json(updatedLevel);
 }
 

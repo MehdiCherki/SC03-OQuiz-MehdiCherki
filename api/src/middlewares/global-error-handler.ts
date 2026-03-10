@@ -11,7 +11,7 @@ export function globalErrorHandler(error: Error, req: Request, res: Response, ne
   // - dans un controlleur en amont, `next(error)`
   // - depuis Express 5, il suffit de throw une erreur dans un controlleur async pour que l'erreur soit transmise ici
 
-  const stackTraceObject = config.isProd ? { stack: error.stack } : {};
+  const stackTraceObject = config.isProd ? {} : { stack: error.stack };
 
   // 1) Gérer les erreurs de validation Zod -> 400 (note : techniquement il faudrait 422, mais on trouve très souvent 400)
   if (error instanceof z.ZodError) {

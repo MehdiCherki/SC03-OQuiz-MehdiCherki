@@ -30,7 +30,7 @@ describe("[GET] /api/users", () => {
 
     // Assert
     // - s'assurer que le retour de l'API correspond bien à l'utilisateur qu'on a inséré en base avec prisma
-    assert.strictEqual(responseUsers.length, 2); // On vérifie que c'est un tableau avec 3 éléments
+    assert.strictEqual(responseUsers.length, 2); // On vérifie que c'est un tableau avec 2 éléments
     assert.strictEqual(responseUsers[0].id, databaseUsers[0].id); // On vérifie que l'ID reçu pour Alice est bien le même que celui la BDD
     assert.strictEqual(responseUsers[1].id, databaseUsers[1].id);
     assert.strictEqual(responseUsers[0].email, "alice@oclock.io");

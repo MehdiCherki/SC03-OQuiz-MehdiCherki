@@ -6,7 +6,7 @@ export const router = Router();
 
 router.post("/auth/register", authController.registerUser);
 router.post("/auth/login", authController.loginUser);
-router.post("/auth/logout", authController.logoutUser);
+router.post("/auth/logout", checkRoles(["member", "author", "admin"]), authController.logoutUser);
 router.post("/auth/refresh", authController.refreshAccessToken);
 router.get(
   "/auth/me",

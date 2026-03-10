@@ -4,6 +4,7 @@ import argon2 from "argon2";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 import { prisma, type User } from "../models/index.ts";
 import { generateAuthTokens } from "../lib/tokens.ts";
+import { config } from "../../config.ts";
 
 describe("[POST] /auth/register", () => {
   // ARRANGE
@@ -142,17 +143,23 @@ describe("[POST] /auth/login", () => {
 describe("[POST] /auth/logout", () => {
   it("should return a 204 status and new cookies to unset existing ones", async () => {
     // ARRANGE
-    it.mock.method(Math, "random", () => "FAKE");
+    const user = await prisma.user.create({
+      data: { firstname: "John", lastname: "Doe", email: "john@oclock.io", password: "password" },
+    });
+    const { accessToken } = generateAuthTokens(user);
 
     // ACT
     const httpResponse = await fetch("http://localhost:7357/api/auth/logout", {
       method: "POST",
+      headers: { Authorization: `Bearer ${accessToken.token}` },
     });
 
     // ASSERT
     assert.strictEqual(httpResponse.status, 204);
-    assert.match(httpResponse.headers.get("set-cookie")!, /accessToken=FAKE/);
-    assert.match(httpResponse.headers.get("set-cookie")!, /refreshToken=FAKE/);
+    // Les cookies doivent être effacés : valeur vide + date d'expiration dans le passé
+    assert.match(httpResponse.headers.get("set-cookie")!, /accessToken=;/);
+    assert.match(httpResponse.headers.get("set-cookie")!, /refreshToken=;/);
+    assert.match(httpResponse.headers.get("set-cookie")!, /Expires=Thu, 01 Jan 1970/);
   });
 });
 
@@ -164,14 +171,15 @@ describe("[POST] /auth/refresh", () => {
         firstname: "John",
         lastname: "Doe",
         email: "john@oclock.io",
-        password: "password",
+        password: await argon2.hash("password"),
       },
     });
-    const refreshToken = await prisma.refreshToken.create({
+    const { refreshToken } = generateAuthTokens(user);
+    await prisma.refreshToken.create({
       data: {
-        token: "12345",
+        token: refreshToken.token,
         user_id: user.id,
-        expires_at: new Date("2080/01/01"), // Celui là a priori il sera valable un p'tit moment
+        expires_at: new Date(Date.now() + refreshToken.expiresIn),
       },
     });
 
@@ -195,14 +203,16 @@ describe("[POST] /auth/refresh", () => {
         firstname: "John",
         lastname: "Doe",
         email: "john@oclock.io",
-        password: "password",
+        password: await argon2.hash("password"),
       },
     });
-    const refreshToken = await prisma.refreshToken.create({
+    // JWT signé avec la bonne audience mais déjà expiré
+    const expiredToken = jwt.sign({ userId: user.id }, config.jwtSecret, { expiresIn: 0, audience: "refresh" });
+    await prisma.refreshToken.create({
       data: {
-        token: "12345",
+        token: expiredToken,
         user_id: user.id,
-        expires_at: new Date("1990/01/01"), // Celui là a priori il n'est plus valide
+        expires_at: new Date("1990/01/01"),
       },
     });
 
@@ -210,7 +220,7 @@ describe("[POST] /auth/refresh", () => {
     const httpResponse = await fetch("http://localhost:7357/api/auth/refresh", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refreshToken: refreshToken.token }),
+      body: JSON.stringify({ refreshToken: expiredToken }),
     });
 
     // ASSERT
@@ -224,14 +234,15 @@ describe("[POST] /auth/refresh", () => {
         firstname: "John",
         lastname: "Doe",
         email: "john@oclock.io",
-        password: "password",
+        password: await argon2.hash("password"),
       },
     });
-    const refreshToken = await prisma.refreshToken.create({
+    const { refreshToken } = generateAuthTokens(user);
+    await prisma.refreshToken.create({
       data: {
-        token: "12345",
+        token: refreshToken.token,
         user_id: user.id,
-        expires_at: new Date("2080/01/01"), // Celui là a priori il sera valable un bon moment
+        expires_at: new Date(Date.now() + refreshToken.expiresIn),
       },
     });
 
@@ -258,7 +269,7 @@ describe("[GET] /auth/me", () => {
         firstname: "John",
         lastname: "Doe",
         email: "john@oclock.io",
-        password: "password",
+        password: await argon2.hash("password"),
       },
     });
     // Générer un accessToken valide pour cet utilisateur
