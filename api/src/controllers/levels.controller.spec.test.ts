@@ -1,19 +1,18 @@
 import { describe, it } from "node:test";
 import { prisma } from "../models/index.ts";
 import assert from "node:assert";
-import { requester } from "../../test/index.ts";
+import { authedRequester } from "../../test/index.ts";
 
 describe("[GET] /api/levels", () => {
   it("should return all levels from the database", async () => {
     // Arrange
-    const levels = await prisma.level.createManyAndReturn({ data: [
-      { name: "Level 1" },
-      { name: "Level 2" }
-    ]});
+    const levels = await prisma.level.createManyAndReturn({
+      data: [{ name: "Level 1" }, { name: "Level 2" }],
+    });
 
     // Act
-    const { data: body } = await requester.get("/levels");
-    
+    const { data: body } = await authedRequester.get("/levels");
+
     // Assert
     assert.strictEqual(body.length, levels.length);
     assert.strictEqual(body[0].name, "Level 1");
@@ -26,7 +25,9 @@ describe("[GET] /api/levels/:id", () => {
     const LEVEL = { name: "Mon niveau" };
     const databaseLevel = await prisma.level.create({ data: LEVEL });
 
-    const { data: level } = await requester.get(`/levels/${databaseLevel.id}`);
+    const { data: level } = await authedRequester.get(
+      `/levels/${databaseLevel.id}`,
+    );
 
     assert.partialDeepStrictEqual(level, LEVEL);
   });
@@ -34,7 +35,9 @@ describe("[GET] /api/levels/:id", () => {
   it("should return a 404 when the requested level does not exist", async () => {
     const UNEXISTING_LEVEL_ID = 42;
 
-    const { status } = await requester.get(`/levels/${UNEXISTING_LEVEL_ID}`);
+    const { status } = await authedRequester.get(
+      `/levels/${UNEXISTING_LEVEL_ID}`,
+    );
 
     assert.equal(status, 404);
   });
@@ -46,10 +49,12 @@ describe("[POST] /api/levels", () => {
     const body = { name: "mon nouveau level" };
 
     // Act
-    await requester.post("/levels", body);
+    await authedRequester.post("/levels", body);
 
     // Assert
-    const createdLevel = await prisma.level.findFirst({ where: { name: "mon nouveau level" } });
+    const createdLevel = await prisma.level.findFirst({
+      where: { name: "mon nouveau level" },
+    });
     assert.ok(createdLevel);
   });
 
@@ -58,7 +63,7 @@ describe("[POST] /api/levels", () => {
     const body = { name: "mon nouveau level" };
 
     // Act
-    const { data: createdLevel } = await requester.post("/levels", body);
+    const { data: createdLevel } = await authedRequester.post("/levels", body);
 
     // Assert
     assert.ok(createdLevel.id);
@@ -75,7 +80,7 @@ describe("[POST] /api/levels", () => {
 
     // Act
     // - tenter de creer le même
-    const httpResponse = await requester.post("/levels", { name: NAME });
+    const httpResponse = await authedRequester.post("/levels", { name: NAME });
 
     // Assert
     // - 409
@@ -88,11 +93,16 @@ describe("[POST] /api/levels", () => {
 describe("[PATCH] /api/levels/:id", () => {
   it("should update the level name in the database", async () => {
     // Arrange
-    const levelToUpdate = await prisma.level.create({ data:  { name: "A mettre à jour"} });
+    const levelToUpdate = await prisma.level.create({
+      data: { name: "A mettre à jour" },
+    });
     const NEW_NAME = "Nouveau nom du niveau";
 
     // Act
-    const httpResponse = await requester.patch(`/levels/${levelToUpdate.id}`, { name: NEW_NAME });
+    const httpResponse = await authedRequester.patch(
+      `/levels/${levelToUpdate.id}`,
+      { name: NEW_NAME },
+    );
 
     // Assert
     assert.strictEqual(httpResponse.status, 200);
@@ -103,9 +113,11 @@ describe("[PATCH] /api/levels/:id", () => {
 
 describe("[DELETE] /api/levels/:id", () => {
   it("should delete the levels from the database", async () => {
-    const level = await prisma.level.create({ data: { name: "Niveau à supprimer" } });
+    const level = await prisma.level.create({
+      data: { name: "Niveau à supprimer" },
+    });
 
-    const { status } = await requester.delete(`/levels/${level.id}`);
+    const { status } = await authedRequester.delete(`/levels/${level.id}`);
 
     assert.equal(status, 204);
     const remainingNumberOfLevels = await prisma.level.count();
@@ -115,7 +127,9 @@ describe("[DELETE] /api/levels/:id", () => {
   it("should return a 404 when the level to delete does not exist", async () => {
     const UNEXISTING_LEVEL_ID = 42;
 
-    const { status } = await requester.delete(`/levels/${UNEXISTING_LEVEL_ID}`);
+    const { status } = await authedRequester.delete(
+      `/levels/${UNEXISTING_LEVEL_ID}`,
+    );
 
     assert.equal(status, 404);
   });

@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import z from "zod";
 import { HttpClientError } from "../lib/errors.ts";
 import { config } from "../../config.ts";
+import logger from "../lib/logger.ts";
 
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -42,7 +43,7 @@ export function globalErrorHandler(error: Error, req: Request, res: Response, ne
   }
 
   // Si l'erreur arrive à ce stade, il faut la logger avec un niveau approprié
-  console.error('Internal server error', error);
+  logger.error('Internal server error', error);
 
   // 4) Gérer les erreurs serveurs - 500
   // Toutes les erreurs non controllées

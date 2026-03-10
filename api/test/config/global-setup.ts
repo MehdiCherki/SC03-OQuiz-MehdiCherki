@@ -14,7 +14,7 @@ import { prisma } from "../../src/models/index.ts";
 // Lacement du serveur Express
 
 // === Entre chaque test ===
-// On vide les tables 
+// On vide les tables
 
 // === APRES les tests ===
 // Deconnexion du client BDD Prisma
@@ -22,16 +22,14 @@ import { prisma } from "../../src/models/index.ts";
 // Supression de la BDD de test
 // ================================================================================
 
-
 // Serveur HTTP (de test)
 let server: Server;
 
 // Hook before : s'exécute une fois avant l'ensemble des tests
 before(() => {
-
   // (Hack) S'assurer que la BDD de test a bien été supprimé
-  execSync(`docker rm -f oquiztest 2>/dev/null || true`); 
-  
+  execSync(`docker rm -f oquiztest 2>/dev/null || true`);
+
   // Créer un conteneur BDD dédié aux tests
   execSync(`
     docker run \
@@ -44,25 +42,27 @@ before(() => {
     postgres:17 
   `);
 
-  // Attendre une petite seconde pour s'assurer qu'elle tourne bien
-  execSync(`sleep 1`);
+  // Attendre que PostgreSQL soit prêt à accepter des connexions
+  execSync(`
+    until docker exec oquiztest pg_isready -U ${process.env.POSTGRES_USER} > /dev/null 2>&1; do
+      sleep 0.5
+    done
+  `);
 
   // Lancer les migrations sur la BDD de test
-  // Note : les variables d'environnement (chargés via --env-file flag) sont passé au child process (execSync) par héritage 
+  // Note : les variables d'environnement (chargés via --env-file flag) sont passé au child process (execSync) par héritage
   execSync(`npx prisma migrate deploy`);
 
   // On lance un serveur de test
   server = app.listen(process.env.PORT);
 });
 
-
 // Hook beforeEach : s'exécute une fois avant chaque test
-beforeEach(async (t) => {
+beforeEach(async t => {
   (t as TestContext).mock.method(console, "info", () => {});
 
   await truncateTables();
 });
-
 
 // Hook after : s'exécute une fois après l'ensemble des tests
 after(async () => {
@@ -76,7 +76,6 @@ after(async () => {
   execSync(`docker rm -f oquiztest`);
 });
 
-
 async function truncateTables() {
   // https://stackoverflow.com/questions/3327312/how-can-i-drop-all-the-tables-in-a-postgresql-database
   await prisma.$executeRawUnsafe(`
@@ -88,4 +87,4 @@ async function truncateTables() {
       END LOOP;
     END $$;
   `);
-};
+}

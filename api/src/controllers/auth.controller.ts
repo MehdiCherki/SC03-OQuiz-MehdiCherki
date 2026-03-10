@@ -10,7 +10,6 @@ import {
   UnauthorizedError,
 } from "../lib/errors.ts";
 import { generateAuthTokens } from "../lib/tokens.ts";
-import jwt from "jsonwebtoken";
 
 interface Token {
   token: string;
@@ -61,6 +60,7 @@ export async function registerUser(req: Request, res: Response) {
   res.status(201).json({
     id: user.id,
     firstname: user.firstname,
+    lastname: user.lastname,
     email: user.email,
     created_at: user.created_at,
     updated_at: user.updated_at,
@@ -142,64 +142,48 @@ export async function getAuthenticatedUser(req: Request, res: Response) {
 
 // logout
 export async function logoutUser(req: Request, res: Response) {
+  const randomStringToUnsetCookie = Math.random().toString();
+  res.cookie("accessToken", randomStringToUnsetCookie);
+  res.cookie("refreshToken", randomStringToUnsetCookie);
   if (req.user) {
-    const randomStringToUnsetCookie = Math.random().toString();
-    res.cookie("accessToken", randomStringToUnsetCookie);
-    res.cookie("refreshToken", randomStringToUnsetCookie);
     await prisma.refreshToken.deleteMany({ where: { user_id: req.user.id } });
-    res.status(204).end();
-  } else {
-    throw new UnauthorizedError(
-      "Vous n'êtes pas autorisé à accéder à cette resource",
-    );
   }
+  res.status(204).end();
 }
 
 export async function refreshAccessToken(req: Request, res: Response) {
-  const receievedRefreshToken = req.cookies.refreshToken;
+  const receivedRefreshToken = req.body?.refreshToken ?? req.cookies.refreshToken;
 
-  console.log("refreshId:", receievedRefreshToken);
-
-  if (!receievedRefreshToken) {
+  if (!receivedRefreshToken) {
     throw new UnauthorizedError(
       "Vous n'êtes pas autorisé à accéder à cette resource",
     );
   }
+
   const existingRefreshToken = await prisma.refreshToken.findFirst({
-    where: { token: receievedRefreshToken },
+    where: { token: receivedRefreshToken },
     include: { user: true },
   });
 
-  if (!existingRefreshToken) {
+  if (!existingRefreshToken || existingRefreshToken.expires_at < new Date()) {
     throw new UnauthorizedError(
       "Vous n'êtes pas autorisé à accéder à cette resource",
     );
   }
-  try {
-    jwt.verify(receievedRefreshToken, config.jwtSecret);
-    const { accessToken, refreshToken } = generateAuthTokens(
-      existingRefreshToken.user,
-    );
-    // stockage du refresh token en DB
-    await replaceRefreshTokenInDatabase(
-      refreshToken,
-      existingRefreshToken.user,
-    );
 
-    setAccessTokenCookie(res, accessToken);
-    setRefreshTokenCookie(res, refreshToken);
+  const { accessToken, refreshToken } = generateAuthTokens(
+    existingRefreshToken.user,
+  );
 
-    // renvoyer les token vers l'utilisateur
-    res.json({
-      accessToken,
-      refreshToken,
-    });
-  } catch (error) {
-    if (error instanceof Error) console.log(error.message);
-    throw new UnauthorizedError(
-      "Vous n'êtes pas autorisé à accéder à cette resource",
-    );
-  }
+  await replaceRefreshTokenInDatabase(refreshToken, existingRefreshToken.user);
+
+  setAccessTokenCookie(res, accessToken);
+  setRefreshTokenCookie(res, refreshToken);
+
+  res.json({
+    accessToken,
+    refreshToken,
+  });
 }
 
 function setAccessTokenCookie(res: Response, accessToken: Token) {

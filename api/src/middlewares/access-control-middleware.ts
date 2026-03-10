@@ -7,13 +7,13 @@ import { config } from "../../config.ts";
 export function checkRoles(roles: Role[]) {
   return (req: Request, res: Response, next: NextFunction) => {
     const token = extractAccessToken(req);
-    const { userId, userRole } = verifyAndDecodeJWT(token);
-    if (!roles.includes(userRole)) {
+    const { userId, role } = verifyAndDecodeJWT(token);
+    if (!roles.includes(role)) {
       throw new ForbiddenError(
-        `le role ${userRole} n'a pas la permission d'accéder à cette resource`,
+        `le role ${role} n'a pas la permission d'accéder à cette resource`,
       );
     }
-    req.user = { id: userId, role: userRole };
+    req.user = { id: userId, role };
     next();
   };
 }
