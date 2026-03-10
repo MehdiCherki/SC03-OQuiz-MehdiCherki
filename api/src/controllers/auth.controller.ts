@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import argon2 from "argon2";
 import z from "zod";
 import { prisma } from "../models/index.ts";
+import { config } from "../../config.ts";
 import type { User } from "../models/index.ts";
 import {
   BadRequestError,
@@ -9,6 +10,7 @@ import {
   UnauthorizedError,
 } from "../lib/errors.ts";
 import { generateAuthTokens } from "../lib/tokens.ts";
+import jwt from "jsonwebtoken";
 
 interface Token {
   token: string;
@@ -104,6 +106,102 @@ export async function loginUser(req: Request, res: Response) {
   });
 }
 
+// Me
+export async function getAuthenticatedUser(req: Request, res: Response) {
+  if (req.user) {
+    try {
+      const user = await prisma.user.findFirst({
+        where: { id: req.user.id },
+      });
+      if (!user) {
+        throw new UnauthorizedError(
+          "Vous n'êtes pas autorisé à accéder à cette resource",
+        );
+      }
+      res.json({
+        id: user.id,
+        email: user.email,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        role: user.role,
+        createdAt: user.created_at,
+        updatedAt: user.updated_at,
+      });
+    } catch (error) {
+      if (error instanceof Error) console.log(error.message);
+      throw new UnauthorizedError(
+        "Vous n'êtes pas autorisé à accéder à cette resource",
+      );
+    }
+  } else {
+    throw new UnauthorizedError(
+      "Vous n'êtes pas autorisé à accéder à cette resource",
+    );
+  }
+}
+
+// logout
+export async function logoutUser(req: Request, res: Response) {
+  if (req.user) {
+    const randomStringToUnsetCookie = Math.random().toString();
+    res.cookie("accessToken", randomStringToUnsetCookie);
+    res.cookie("refreshToken", randomStringToUnsetCookie);
+    await prisma.refreshToken.deleteMany({ where: { user_id: req.user.id } });
+    res.status(204).end();
+  } else {
+    throw new UnauthorizedError(
+      "Vous n'êtes pas autorisé à accéder à cette resource",
+    );
+  }
+}
+
+export async function refreshAccessToken(req: Request, res: Response) {
+  const receievedRefreshToken = req.cookies.refreshToken;
+
+  console.log("refreshId:", receievedRefreshToken);
+
+  if (!receievedRefreshToken) {
+    throw new UnauthorizedError(
+      "Vous n'êtes pas autorisé à accéder à cette resource",
+    );
+  }
+  const existingRefreshToken = await prisma.refreshToken.findFirst({
+    where: { token: receievedRefreshToken },
+    include: { user: true },
+  });
+
+  if (!existingRefreshToken) {
+    throw new UnauthorizedError(
+      "Vous n'êtes pas autorisé à accéder à cette resource",
+    );
+  }
+  try {
+    jwt.verify(receievedRefreshToken, config.jwtSecret);
+    const { accessToken, refreshToken } = generateAuthTokens(
+      existingRefreshToken.user,
+    );
+    // stockage du refresh token en DB
+    await replaceRefreshTokenInDatabase(
+      refreshToken,
+      existingRefreshToken.user,
+    );
+
+    setAccessTokenCookie(res, accessToken);
+    setRefreshTokenCookie(res, refreshToken);
+
+    // renvoyer les token vers l'utilisateur
+    res.json({
+      accessToken,
+      refreshToken,
+    });
+  } catch (error) {
+    if (error instanceof Error) console.log(error.message);
+    throw new UnauthorizedError(
+      "Vous n'êtes pas autorisé à accéder à cette resource",
+    );
+  }
+}
+
 function setAccessTokenCookie(res: Response, accessToken: Token) {
   res.cookie("accessToken", accessToken.token, {
     httpOnly: true, // interdit l'accès au cookie par JS côté client
@@ -130,7 +228,7 @@ async function replaceRefreshTokenInDatabase(refreshToken: Token, user: User) {
       token: refreshToken.token,
       user_id: user.id,
       issued_at: new Date(),
-      expires_at: new Date(new Date().valueOf() + refreshToken.expiresIn),
+      expires_at: new Date(new Date().getTime() + refreshToken.expiresIn),
     },
   });
 }

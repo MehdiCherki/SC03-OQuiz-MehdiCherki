@@ -1,22 +1,43 @@
+@baseUrl = http://localhost:3000/api
 
 ### Register
-POST http://localhost:3000/api/auth/register
+POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
 {
-  "firstname":"Julien",
-  "lastname": "leperse",
-  "email": "juju@questionpourunchampion.fr",
-  "password":"Agdkf94g4sz6zrf!",
-  "confirm":"Agdkf94g4sz6zrf!"
+  "firstname":"Benoit",
+  "lastname": "Schiex",
+  "email": "benoit.schiex.ext@oclock.io",
+  "password":"Dfgbflmlskdjf78!",
+  "confirm":"Dfgbflmlskdjf78!"
 }
 
 
 ### Login
-POST http://localhost:3000/api/auth/login
+POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-  "email": "juju@questionpourunchampion.fr",
-  "password":"Agdkf94g4sz6zrf!"
+  "email": "benoit.schiex.ext@oclock.io",
+  "password":"Dfgbflmlskdjf78!"
 }
+
+### Logout
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJtZW1iZXIiLCJpYXQiOjE3NzMxMzg2ODAsImV4cCI6MTc3MzEzOTU4MH0.d4Qe277p0H7KfLg5-6xihib2AZJzNEckLrUE6epTMhU
+Content-Type: application/json
+
+### Me
+GET {{baseUrl}}/auth/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJtZW1iZXIiLCJpYXQiOjE3NzMxMzg2ODAsImV4cCI6MTc3MzEzOTU4MH0.d4Qe277p0H7KfLg5-6xihib2AZJzNEckLrUE6epTMhU
+
+### Refresh
+POST {{baseUrl}}/auth/refresh
+
+### get all users
+GET {{baseUrl}}/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsInVzZXJSb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzMxNDU4OTUsImV4cCI6MTc3MzE0Njc5NX0.FJMbVZF9OitJSiGIeuyzrZG-eLCwfAEagwBT_l30a1c
+
+### get all levels
+GET {{baseUrl}}/levels
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsInVzZXJSb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzMxNDU4OTUsImV4cCI6MTc3MzE0Njc5NX0.FJMbVZF9OitJSiGIeuyzrZG-eLCwfAEagwBT_l30a1c
