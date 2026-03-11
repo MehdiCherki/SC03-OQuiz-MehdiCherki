@@ -16,7 +16,7 @@ if (config.isProd) {
 }
 
 // Autoriser les requêtes cross-origin
-app.use(cors({ origin: config.allowedOrigins }));
+app.use(cors({ origin: config.allowedOrigins, credentials: true }));
 
 app.use(cookieParser());
 

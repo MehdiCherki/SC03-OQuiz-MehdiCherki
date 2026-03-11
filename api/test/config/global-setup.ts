@@ -26,28 +26,22 @@ import { prisma } from "../../src/models/index.ts";
 let server: Server;
 
 // Hook before : s'exécute une fois avant l'ensemble des tests
-before(() => {
+before(async () => {
   // (Hack) S'assurer que la BDD de test a bien été supprimé
-  execSync(`docker rm -f oquiztest 2>/dev/null || true`);
+  try { execSync(`docker rm -f oquiztest`, { stdio: "ignore" }); } catch {}
 
-  // Créer un conteneur BDD dédié aux tests
-  execSync(`
-    docker run \
-    -d \
-    --name oquiztest \
-    -p ${process.env.POSTGRES_PORT}:5432 \
-    -e POSTGRES_USER=${process.env.POSTGRES_USER} \
-    -e POSTGRES_PASSWORD=${process.env.POSTGRES_PASSWORD} \
-    -e POSTGRES_DB=${process.env.POSTGRES_DB} \
-    postgres:17 
-  `);
+  // Créer un conteneur BDD dédié aux tests (commande sur une seule ligne pour compatibilité Windows)
+  execSync(`docker run -d --name oquiztest -p ${process.env.POSTGRES_PORT}:5432 -e POSTGRES_USER=${process.env.POSTGRES_USER} -e POSTGRES_PASSWORD=${process.env.POSTGRES_PASSWORD} -e POSTGRES_DB=${process.env.POSTGRES_DB} postgres:17`);
 
-  // Attendre que PostgreSQL soit prêt à accepter des connexions
-  execSync(`
-    until docker exec oquiztest pg_isready -U ${process.env.POSTGRES_USER} > /dev/null 2>&1; do
-      sleep 0.5
-    done
-  `);
+  // Attendre que PostgreSQL soit prêt à accepter des connexions (boucle Node.js pour compatibilité Windows)
+  for (let i = 0; i < 30; i++) {
+    try {
+      execSync(`docker exec oquiztest pg_isready -U ${process.env.POSTGRES_USER}`, { stdio: "ignore" });
+      break;
+    } catch {
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+  }
 
   // Lancer les migrations sur la BDD de test
   // Note : les variables d'environnement (chargés via --env-file flag) sont passé au child process (execSync) par héritage

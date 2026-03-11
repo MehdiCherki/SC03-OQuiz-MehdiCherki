@@ -5,25 +5,42 @@
 <main>
   <p>Nous sommes le {toReadableDate(new Date())}</p>
 
-  {#if isLoading}
-    <p>Données en cours de chargement...</p>
-  {/if}
+  {#if !isLoggedIn}
+    <form onsubmit={handleLogin}>
+      <label>
+        Email
+        <input type="email" bind:value={email} required />
+      </label>
+      <label>
+        Mot de passe
+        <input type="password" bind:value={password} required />
+      </label>
+      {#if loginError}
+        <p>{loginError}</p>
+      {/if}
+      <button type="submit">Se connecter</button>
+    </form>
+  {:else}
+    {#if isLoading}
+      <p>Données en cours de chargement...</p>
+    {/if}
 
-  {#if hasError}
-    <p>Une erreur est survenue. Merci de bien vouloir réessayer plus tard.</p>
-  {/if}
-  
-  {#if !isLoading && !hasError && users.length === 0}
-    <p>Aucun utilisateur trouvé.</p>
-  {/if}
+    {#if hasError}
+      <p>Une erreur est survenue. Merci de bien vouloir réessayer plus tard.</p>
+    {/if}
 
-  {#if users.length > 0}
-    <h2>Liste des utilisateurs</h2>
-    <ul>
-      {#each users as user}
-        <li>{user.firstname}</li>
-      {/each}
-    </ul>
+    {#if !isLoading && !hasError && users.length === 0}
+      <p>Aucun utilisateur trouvé.</p>
+    {/if}
+
+    {#if users.length > 0}
+      <h2>Liste des utilisateurs</h2>
+      <ul>
+        {#each users as user}
+          <li>{user.firstname}</li>
+        {/each}
+      </ul>
+    {/if}
   {/if}
 </main>
 
@@ -39,14 +56,26 @@
   let users = $state<UserDTO[]>([]);
   let hasError = $state(false);
   let isLoading = $state(false);
+  let isLoggedIn = $state(false);
+  let email = $state("");
+  let password = $state("");
+  let loginError = $state("");
 
-  $effect(() => {
-    fetchUsers();
-  });
+  async function handleLogin(e: Event) {
+    e.preventDefault();
+    loginError = "";
+    try {
+      await api.login(email, password);
+      isLoggedIn = true;
+      fetchUsers();
+    } catch (error) {
+      loginError = "Identifiants incorrects.";
+    }
+  }
 
   async function fetchUsers() {
     isLoading = true;
-    
+
     try {
       users = await api.getUsers();
     } catch (error) {
