@@ -23,13 +23,13 @@ jobs:
     steps:
       # Récupérer le code du dépôt (action officielle)
       - name: Checkout code
-        uses: actions/checkout@v4 # v4 est la version actuelle, vérifier la dernière
+        uses: actions/checkout@v5 # v4 est la version actuelle, vérifier la dernière
 
       # Mettre en place Node.js
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: '22' # Spécifie la version de Node.js
+          node-version: "22" # Spécifie la version de Node.js
 
       # Installer les dépendances (commande shell)
       - name: Install dependencies
@@ -44,7 +44,7 @@ jobs:
         env:
           VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
         run: npm run build --prefix client
-      
+
       # Installer surge
       - name: Install Surge CLI
         run: npm install --global surge
@@ -52,4 +52,3 @@ jobs:
       # Déployer le code buildé
       - name: Deploy build
         run: surge --project ./client/dist --domain ${{ vars.SURGE_DOMAIN }} --token ${{ secrets.SURGE_TOKEN }}
-
