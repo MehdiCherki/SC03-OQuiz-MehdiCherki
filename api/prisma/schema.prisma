@@ -1,3 +1,5 @@
+// Schéma complémentaire pour les curieux, par exemple pour la correction de l'atelier de SC03
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -9,43 +11,149 @@ generator client {
 }
 
 model User {
-  id Int @id @default(autoincrement())
-
-  firstname String
-  lastname  String
-  email     String @unique()
-  password  String
-  role      Role   @default(member)
-
-  created_at    DateTime       @default(now())
-  updated_at    DateTime       @default(now()) @updatedAt
-  refreshTokens RefreshToken[]
-
-  @@map("user") // Correspondance entre le model User dans le code et la table "user" dans la BDD
-}
-
-model Level {
-  id Int @id @default(autoincrement())
-
-  name String @unique()
+  id         Int     @id @default(autoincrement())
+  firstname  String
+  lastname   String
+  email      String  @unique
+  password   String
+  role       Role    @default(member)
 
   created_at DateTime @default(now())
   updated_at DateTime @default(now()) @updatedAt
 
-  @@map("level")
+  quizzes       Quiz[]
+  attempts      Attempt[]
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+model Quiz {
+  id          Int     @id @default(autoincrement())
+  title       String
+  description String?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+
+  author    User @relation(fields: [author_id], references: [id], onDelete: Restrict)
+  author_id Int
+
+  questions Question[]
+  tags      QuizHasTag[]
+  attempts  Attempt[]
+
+  @@index([author_id])
+  @@map("quizzes")
+}
+
+model Question {
+  id          Int     @id @default(autoincrement())
+  description String
+  anecdote    String?
+  wiki_link   String?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+
+  quiz    Quiz @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
+  quiz_id Int
+
+  choices  Choice[]
+  level    Level?   @relation(fields: [level_id], references: [id], onDelete: SetNull)
+  level_id Int?
+
+  @@index([quiz_id])
+  @@index([level_id])
+  @@map("questions")
+}
+
+model Level {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+
+  questions Question[]
+
+  @@map("levels")
+}
+
+model Choice {
+  id          Int     @id @default(autoincrement())
+  description String
+  is_valid    Boolean
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+
+  question    Question @relation(fields: [question_id], references: [id], onDelete: Cascade)
+  question_id Int
+
+  @@index([question_id])
+  @@map("choices")
+}
+
+model Tag {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+
+  parent_tag    Tag?  @relation("TagHasSubTag", fields: [parent_tag_id], references: [id], onDelete: SetNull)
+  children_tags Tag[] @relation("TagHasSubTag")
+  parent_tag_id Int?
+
+  quizzes QuizHasTag[]
+
+  @@index([parent_tag_id])
+  @@map("tags")
+}
+
+model QuizHasTag {
+  quiz    Quiz @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
+  quiz_id Int
+
+  tag    Tag @relation(fields: [tag_id], references: [id], onDelete: Cascade)
+  tag_id Int
+
+  @@id([quiz_id, tag_id])
+  @@map("quizzes_has_tags")
+}
+
+model Attempt {
+  id        Int @id @default(autoincrement())
+  score     Int
+  max_score Int
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+
+  user    User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id Int
+
+  quiz    Quiz @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
+  quiz_id Int
+
+  @@index([user_id])
+  @@index([quiz_id])
+  @@map("attempts")
 }
 
 model RefreshToken {
   id    Int    @id @default(autoincrement())
-  token String
+  token String @unique
 
   issued_at  DateTime @default(now())
   expires_at DateTime
 
-  user    User @relation(fields: [user_id], references: [id])
+  user    User @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id Int
 
-  @@map("refresh_token")
+  @@index([user_id])
+  @@map("refresh_tokens")
 }
 
 enum Role {

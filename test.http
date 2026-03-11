@@ -1,43 +1,587 @@
-@baseUrl = http://localhost:3000/api
+# ==============================================================================
+# OQuiz — Tests manuels des routes (REST Client / VS Code)
+# ==============================================================================
+# Usage :
+#   1. Lancer le serveur : npm run dev
+#   2. Exécuter "Register" puis "Login" pour obtenir un token
+#   3. Copier l'accessToken dans @token ci-dessous
+#   4. Ajuster les IDs selon les ressources créées
+# ==============================================================================
 
-### Register
+@baseUrl     = http://localhost:3000/api
+
+# Remplacer par le token obtenu après "Login"
+@token       = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwLCJyb2xlIjoibWVtYmVyIiwiaWF0IjoxNzczMjYxMjc5LCJleHAiOjE3NzMyNjIxNzksImF1ZCI6ImFjY2VzcyJ9.ifOwGNIM_0wh3z7cVHw2UyydkiVBd1qopmkfp-wjXqE
+
+# Remplacer par un token admin pour les routes admin-only
+@adminToken  = PASTE_ADMIN_TOKEN_HERE
+
+# IDs à ajuster selon les ressources existantes en BDD
+@levelId     = 1
+@tagId       = 1
+@quizId      = 1
+@questionId  = 1
+@choiceId    = 1
+@userId      = 1
+
+
+# ==============================================================================
+# AUTH
+# ==============================================================================
+
+### [POST] /auth/register — Inscription d'un nouvel utilisateur
 POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
 {
-  "firstname":"Benoit",
-  "lastname": "Schiex",
-  "email": "benoit.schiex.ext@oclock.io",
-  "password":"Dfgbflmlskdjf78!",
-  "confirm":"Dfgbflmlskdjf78!"
+  "firstname": "Alice",
+  "lastname": "Dupont",
+  "email": "alice@example.io",
+  "password": "!Password54321",
+  "confirm": "!Password54321"
 }
 
+###
 
-### Login
+### [POST] /auth/register — 409 : email déjà utilisé
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "firstname": "Alice",
+  "lastname": "Dupont",
+  "email": "alice@example.io",
+  "password": "!Password54321",
+  "confirm": "!Password54321"
+}
+
+###
+
+### [POST] /auth/register — 400 : body invalide (champs manquants)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "incomplete@example.io"
+}
+
+###
+
+### [POST] /auth/login — Connexion (copier l'accessToken dans @token)
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-  "email": "benoit.schiex.ext@oclock.io",
-  "password":"Dfgbflmlskdjf78!"
+  "email": "alice@example.io",
+  "password": "!Password54321"
 }
 
-### Logout
-POST {{baseUrl}}/auth/logout
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJtZW1iZXIiLCJpYXQiOjE3NzMxMzg2ODAsImV4cCI6MTc3MzEzOTU4MH0.d4Qe277p0H7KfLg5-6xihib2AZJzNEckLrUE6epTMhU
+###
+
+### [POST] /auth/login — 401 : mauvais mot de passe
+POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
-### Me
-GET {{baseUrl}}/auth/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJtZW1iZXIiLCJpYXQiOjE3NzMxMzg2ODAsImV4cCI6MTc3MzEzOTU4MH0.d4Qe277p0H7KfLg5-6xihib2AZJzNEckLrUE6epTMhU
+{
+  "email": "alice@example.io",
+  "password": "WrongPassword!"
+}
 
-### Refresh
+###
+
+### [POST] /auth/refresh — Renouveler l'access token via le body
 POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
 
-### get all users
-GET {{baseUrl}}/users
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsInVzZXJSb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzMxNDU4OTUsImV4cCI6MTc3MzE0Njc5NX0.FJMbVZF9OitJSiGIeuyzrZG-eLCwfAEagwBT_l30a1c
+{
+  "refreshToken": "PASTE_REFRESH_TOKEN_HERE"
+}
 
-### get all levels
+###
+
+### [GET] /auth/me — Informations de l'utilisateur connecté
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+###
+
+### [GET] /auth/me — 401 : sans token
+GET {{baseUrl}}/auth/me
+
+###
+
+### [POST] /auth/logout — Déconnexion
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+###
+
+
+# ==============================================================================
+# LEVELS
+# ==============================================================================
+
+### [GET] /levels — Liste de tous les niveaux (member+)
 GET {{baseUrl}}/levels
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsInVzZXJSb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzMxNDU4OTUsImV4cCI6MTc3MzE0Njc5NX0.FJMbVZF9OitJSiGIeuyzrZG-eLCwfAEagwBT_l30a1c
+Authorization: Bearer {{token}}
+
+###
+
+### [GET] /levels/:id — Détail d'un niveau
+GET {{baseUrl}}/levels/{{levelId}}
+Authorization: Bearer {{token}}
+
+###
+
+### [GET] /levels/:id — 404 : niveau inexistant
+GET {{baseUrl}}/levels/99999
+Authorization: Bearer {{token}}
+
+###
+
+### [POST] /levels — Créer un niveau (admin uniquement)
+POST {{baseUrl}}/levels
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Débutant"
+}
+
+###
+
+### [POST] /levels — 409 : nom déjà utilisé
+POST {{baseUrl}}/levels
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Débutant"
+}
+
+###
+
+### [POST] /levels — 403 : accès refusé (non-admin)
+POST {{baseUrl}}/levels
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Interdit"
+}
+
+###
+
+### [PATCH] /levels/:id — Modifier un niveau (admin uniquement)
+PATCH {{baseUrl}}/levels/{{levelId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Débutant modifié"
+}
+
+###
+
+### [DELETE] /levels/:id — Supprimer un niveau (admin uniquement)
+DELETE {{baseUrl}}/levels/{{levelId}}
+Authorization: Bearer {{adminToken}}
+
+###
+
+
+# ==============================================================================
+# TAGS
+# ==============================================================================
+
+### [GET] /tags — Liste de tous les tags
+GET {{baseUrl}}/tags
+Authorization: Bearer {{token}}
+
+###
+
+### [GET] /tags/:id — Détail d'un tag
+GET {{baseUrl}}/tags/{{tagId}}
+Authorization: Bearer {{token}}
+
+###
+
+### [GET] /tags/:id — 404 : tag inexistant
+GET {{baseUrl}}/tags/99999
+Authorization: Bearer {{token}}
+
+###
+
+### [POST] /tags — Créer un tag sans parent (auteur ou admin)
+POST {{baseUrl}}/tags
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "JavaScript"
+}
+
+###
+
+### [POST] /tags — Créer un sous-tag (avec parent_tag_id)
+POST {{baseUrl}}/tags
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "TypeScript",
+  "parent_tag_id": {{tagId}}
+}
+
+###
+
+### [POST] /tags — 409 : nom de tag déjà utilisé
+POST {{baseUrl}}/tags
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "JavaScript"
+}
+
+###
+
+### [PATCH] /tags/:id — Modifier un tag (admin uniquement)
+PATCH {{baseUrl}}/tags/{{tagId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "JavaScript modifié"
+}
+
+###
+
+### [DELETE] /tags/:id — Supprimer un tag (admin uniquement)
+DELETE {{baseUrl}}/tags/{{tagId}}
+Authorization: Bearer {{adminToken}}
+
+###
+
+
+# ==============================================================================
+# QUIZZES
+# ==============================================================================
+
+### [GET] /quizzes/recent — 6 derniers quizzes (public, sans token)
+GET {{baseUrl}}/quizzes/recent
+
+###
+
+### [GET] /quizzes — Liste de tous les quizzes (member+)
+GET {{baseUrl}}/quizzes
+Authorization: Bearer {{token}}
+
+###
+
+### [GET] /quizzes/:id — Détail d'un quiz avec questions et choix
+GET {{baseUrl}}/quizzes/{{quizId}}
+Authorization: Bearer {{token}}
+
+###
+
+### [GET] /quizzes/:id — 404 : quiz inexistant
+GET {{baseUrl}}/quizzes/99999
+Authorization: Bearer {{token}}
+
+###
+
+### [GET] /quizzes/:id/questions — Questions et choix d'un quiz
+GET {{baseUrl}}/quizzes/{{quizId}}/questions
+Authorization: Bearer {{token}}
+
+###
+
+### [POST] /quizzes — Créer un quiz (auteur ou admin)
+POST {{baseUrl}}/quizzes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Mon super quiz",
+  "description": "Un quiz de test"
+}
+
+###
+
+### [POST] /quizzes — 400 : title manquant
+POST {{baseUrl}}/quizzes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Sans titre"
+}
+
+###
+
+### [PATCH] /quizzes/:id — Modifier un quiz
+PATCH {{baseUrl}}/quizzes/{{quizId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Quiz modifié",
+  "description": "Nouvelle description"
+}
+
+###
+
+### [PUT] /quizzes/:id/tags/:tagId — Associer un tag à un quiz
+PUT {{baseUrl}}/quizzes/{{quizId}}/tags/{{tagId}}
+Authorization: Bearer {{token}}
+
+###
+
+### [PUT] /quizzes/:id/tags/:tagId — Idempotent : re-associer le même tag
+PUT {{baseUrl}}/quizzes/{{quizId}}/tags/{{tagId}}
+Authorization: Bearer {{token}}
+
+###
+
+### [DELETE] /quizzes/:id/tags/:tagId — Retirer un tag d'un quiz
+DELETE {{baseUrl}}/quizzes/{{quizId}}/tags/{{tagId}}
+Authorization: Bearer {{token}}
+
+###
+
+### [DELETE] /quizzes/:id/tags/:tagId — 404 : tag non associé
+DELETE {{baseUrl}}/quizzes/{{quizId}}/tags/99999
+Authorization: Bearer {{token}}
+
+###
+
+### [GET] /quizzes/:id/attempts — Tentatives d'un quiz (auteur ou admin)
+GET {{baseUrl}}/quizzes/{{quizId}}/attempts
+Authorization: Bearer {{adminToken}}
+
+###
+
+### [POST] /quizzes/:id/attempts — Enregistrer une tentative
+POST {{baseUrl}}/quizzes/{{quizId}}/attempts
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+[
+  { "question_id": {{questionId}}, "user_choice_id": {{choiceId}} }
+]
+
+###
+
+### [DELETE] /quizzes/:id — Supprimer un quiz
+DELETE {{baseUrl}}/quizzes/{{quizId}}
+Authorization: Bearer {{token}}
+
+###
+
+
+# ==============================================================================
+# QUESTIONS
+# ==============================================================================
+
+### [POST] /quizzes/:id/questions — Ajouter une question à un quiz
+POST {{baseUrl}}/quizzes/{{quizId}}/questions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Quelle est la capitale de la France ?",
+  "level_id": {{levelId}}
+}
+
+###
+
+### [POST] /quizzes/:id/questions — Sans level_id (optionnel)
+POST {{baseUrl}}/quizzes/{{quizId}}/questions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Question sans niveau associé"
+}
+
+###
+
+### [POST] /quizzes/:id/questions — 403 : auteur différent
+POST {{baseUrl}}/quizzes/{{quizId}}/questions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Tentative d'injection par un autre auteur"
+}
+
+###
+
+### [PATCH] /questions/:id — Modifier une question
+PATCH {{baseUrl}}/questions/{{questionId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Question modifiée ?",
+  "level_id": {{levelId}}
+}
+
+###
+
+### [PATCH] /questions/:id — 404 : question inexistante
+PATCH {{baseUrl}}/questions/99999
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Inexistant"
+}
+
+###
+
+### [DELETE] /questions/:id — Supprimer une question et ses choix
+DELETE {{baseUrl}}/questions/{{questionId}}
+Authorization: Bearer {{token}}
+
+###
+
+
+# ==============================================================================
+# CHOICES
+# ==============================================================================
+
+### [POST] /questions/:id/choices — Ajouter un choix valide à une question
+POST {{baseUrl}}/questions/{{questionId}}/choices
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Paris",
+  "is_valid": true
+}
+
+###
+
+### [POST] /questions/:id/choices — Ajouter un choix invalide
+POST {{baseUrl}}/questions/{{questionId}}/choices
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Lyon",
+  "is_valid": false
+}
+
+###
+
+### [POST] /questions/:id/choices — 400 : is_valid manquant
+POST {{baseUrl}}/questions/{{questionId}}/choices
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Choix sans is_valid"
+}
+
+###
+
+### [PATCH] /choices/:id — Modifier un choix
+PATCH {{baseUrl}}/choices/{{choiceId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Paris (modifié)",
+  "is_valid": true
+}
+
+###
+
+### [PATCH] /choices/:id — 404 : choix inexistant
+PATCH {{baseUrl}}/choices/99999
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Inexistant"
+}
+
+###
+
+### [DELETE] /choices/:id — Supprimer un choix
+DELETE {{baseUrl}}/choices/{{choiceId}}
+Authorization: Bearer {{token}}
+
+###
+
+
+# ==============================================================================
+# USERS
+# ==============================================================================
+
+### [GET] /users — Liste de tous les utilisateurs (admin uniquement)
+GET {{baseUrl}}/users
+Authorization: Bearer {{adminToken}}
+
+###
+
+### [GET] /users — Avec limite
+GET {{baseUrl}}/users?limit=5
+Authorization: Bearer {{adminToken}}
+
+###
+
+### [GET] /users — 403 : accès refusé (non-admin)
+GET {{baseUrl}}/users
+Authorization: Bearer {{token}}
+
+###
+
+### [GET] /users/:id/profile — Profil d'un utilisateur avec nb_quiz_played
+GET {{baseUrl}}/users/{{userId}}/profile
+Authorization: Bearer {{token}}
+
+###
+
+### [GET] /users/:id/profile — 404 : utilisateur inexistant
+GET {{baseUrl}}/users/99999/profile
+Authorization: Bearer {{token}}
+
+###
+
+### [GET] /users/:id/attempts — Tentatives d'un utilisateur (soi-même)
+GET {{baseUrl}}/users/{{userId}}/attempts
+Authorization: Bearer {{token}}
+
+###
+
+### [GET] /users/:id/attempts — Admin peut voir les tentatives de n'importe qui
+GET {{baseUrl}}/users/{{userId}}/attempts
+Authorization: Bearer {{adminToken}}
+
+###
+
+### [GET] /users/:id/attempts — 403 : voir les tentatives d'un autre utilisateur
+GET {{baseUrl}}/users/99999/attempts
+Authorization: Bearer {{token}}
+
+###
+
+
+# ==============================================================================
+# RATE LIMITING (tester manuellement en envoyant plusieurs fois de suite)
+# ==============================================================================
+
+### [POST] /auth/login — Dépasser le rate limit (envoyer > 10 fois)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "inconnu@example.io",
+  "password": "wrong"
+}
+
+###

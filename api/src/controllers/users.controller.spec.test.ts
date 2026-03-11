@@ -1,7 +1,8 @@
 import assert from "node:assert";
 import { describe, it } from "node:test";
 import { prisma } from "../models/index.ts";
-import { authedRequester } from "../../test/index.ts";
+import argon2 from "argon2";
+import { authedRequester, buildAuthedRequester } from "../../test/index.ts";
 
 describe("[GET] /api/users", () => {
   it("should return an array containing the users from the database", async () => {
@@ -65,6 +66,26 @@ describe("[GET] /api/users", () => {
     });
   });
 
+  it("should return 403 when a member calls GET /users", async () => {
+    // Arrange
+    const member = await prisma.user.create({
+      data: {
+        firstname: "Member",
+        lastname: "Test",
+        email: "member-getusers@oclock.io",
+        password: await argon2.hash("password"),
+        role: "member",
+      },
+    });
+    const memberRequester = buildAuthedRequester(member);
+
+    // Act
+    const { status } = await memberRequester.get("/users");
+
+    // Assert
+    assert.strictEqual(status, 403);
+  });
+
   it("should accept the 'limit' query param", async () => {
     // Arrange
     await prisma.user.createManyAndReturn({
@@ -110,5 +131,161 @@ describe("[GET] /api/users", () => {
 
     // Assert
     assert.strictEqual(users.length, NB_OF_REQUESTED_USERS);
+  });
+});
+
+describe("[GET] /api/users/:id/profile", () => {
+  it("should return the user profile with nb_quiz_played", async () => {
+    // Arrange
+    const user = await prisma.user.create({
+      data: {
+        firstname: "Carol",
+        lastname: "Profile",
+        email: "carol-profile@oclock.io",
+        password: await argon2.hash("password"),
+        role: "member",
+      },
+    });
+    const author = await prisma.user.create({
+      data: {
+        firstname: "Dave",
+        lastname: "Author",
+        email: "dave-profile-author@oclock.io",
+        password: await argon2.hash("password"),
+        role: "author",
+      },
+    });
+    const quiz = await prisma.quiz.create({ data: { title: "Quiz test", author_id: author.id } });
+    await prisma.attempt.create({ data: { score: 3, max_score: 5, user_id: user.id, quiz_id: quiz.id } });
+
+    // Act
+    const { data: profile, status } = await authedRequester.get(`/users/${user.id}/profile`);
+
+    // Assert
+    assert.strictEqual(status, 200);
+    assert.strictEqual(profile.id, user.id);
+    assert.strictEqual(profile.email, user.email);
+    assert.strictEqual(profile.nb_quiz_played, 1);
+    assert.ok(!profile.password);
+  });
+
+  it("should return a 404 when the user does not exist", async () => {
+    const { status } = await authedRequester.get("/users/9999/profile");
+    assert.strictEqual(status, 404);
+  });
+
+  it("should return 401 when accessed without authentication", async () => {
+    const user = await prisma.user.create({
+      data: {
+        firstname: "Eve",
+        lastname: "Test",
+        email: "eve-profile@oclock.io",
+        password: await argon2.hash("password"),
+        role: "member",
+      },
+    });
+    const response = await fetch(`http://localhost:7357/api/users/${user.id}/profile`);
+    assert.strictEqual(response.status, 401);
+  });
+});
+
+describe("[GET] /api/users/:id/attempts", () => {
+  it("should return the attempts of a user (admin access)", async () => {
+    // Arrange
+    const user = await prisma.user.create({
+      data: {
+        firstname: "Frank",
+        lastname: "Attempts",
+        email: "frank-attempts@oclock.io",
+        password: await argon2.hash("password"),
+        role: "member",
+      },
+    });
+    const author = await prisma.user.create({
+      data: {
+        firstname: "Grace",
+        lastname: "Author",
+        email: "grace-attempts-author@oclock.io",
+        password: await argon2.hash("password"),
+        role: "author",
+      },
+    });
+    const quiz = await prisma.quiz.create({ data: { title: "Quiz attempts", author_id: author.id } });
+    await prisma.attempt.create({ data: { score: 2, max_score: 4, user_id: user.id, quiz_id: quiz.id } });
+
+    // Act — admin accède aux tentatives de n'importe qui
+    const { data: attempts, status } = await authedRequester.get(`/users/${user.id}/attempts`);
+
+    // Assert
+    assert.strictEqual(status, 200);
+    assert.strictEqual(attempts.length, 1);
+    assert.strictEqual(attempts[0].score, 2);
+    assert.ok(attempts[0].quiz);
+  });
+
+  it("should allow a user to access their own attempts", async () => {
+    // Arrange
+    const user = await prisma.user.create({
+      data: {
+        firstname: "Hank",
+        lastname: "Self",
+        email: "hank-self@oclock.io",
+        password: await argon2.hash("password"),
+        role: "member",
+      },
+    });
+    const userRequester = buildAuthedRequester(user);
+    const author = await prisma.user.create({
+      data: {
+        firstname: "Iris",
+        lastname: "Author",
+        email: "iris-self-author@oclock.io",
+        password: await argon2.hash("password"),
+        role: "author",
+      },
+    });
+    const quiz = await prisma.quiz.create({ data: { title: "Quiz self", author_id: author.id } });
+    await prisma.attempt.create({ data: { score: 1, max_score: 3, user_id: user.id, quiz_id: quiz.id } });
+
+    // Act
+    const { data: attempts, status } = await userRequester.get(`/users/${user.id}/attempts`);
+
+    // Assert
+    assert.strictEqual(status, 200);
+    assert.strictEqual(attempts.length, 1);
+  });
+
+  it("should return 403 when a member tries to access another user's attempts", async () => {
+    // Arrange
+    const member = await prisma.user.create({
+      data: {
+        firstname: "Jack",
+        lastname: "Member",
+        email: "jack-403@oclock.io",
+        password: await argon2.hash("password"),
+        role: "member",
+      },
+    });
+    const otherUser = await prisma.user.create({
+      data: {
+        firstname: "Kate",
+        lastname: "Other",
+        email: "kate-other@oclock.io",
+        password: await argon2.hash("password"),
+        role: "member",
+      },
+    });
+    const memberRequester = buildAuthedRequester(member);
+
+    // Act
+    const { status } = await memberRequester.get(`/users/${otherUser.id}/attempts`);
+
+    // Assert
+    assert.strictEqual(status, 403);
+  });
+
+  it("should return a 404 when the user does not exist", async () => {
+    const { status } = await authedRequester.get("/users/9999/attempts");
+    assert.strictEqual(status, 404);
   });
 });

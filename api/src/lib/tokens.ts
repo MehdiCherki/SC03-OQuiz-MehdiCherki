@@ -1,4 +1,3 @@
-import crypto from "node:crypto";
 import jwt from "jsonwebtoken";
 import { config } from "../../config.ts";
 import type { User } from "../models/index.ts";
@@ -9,13 +8,14 @@ export function generateAuthTokens(user: User) {
     role: user.role,
   };
 
-  const accessToken = jwt.sign(payload, config.jwtSecret, { expiresIn: "15m", audience: "access" });
-  const refreshUniqueId = crypto.randomBytes(128).toString("base64");
-  const refreshToken = jwt.sign(
-    { refreshId: refreshUniqueId },
-    config.jwtSecret,
-    { expiresIn: "7d", audience: "refresh" },
-  );
+  const accessToken = jwt.sign(payload, config.jwtSecret, {
+    expiresIn: "15m",
+    audience: "access",
+  });
+  const refreshToken = jwt.sign(payload, config.jwtSecret, {
+    expiresIn: "7d",
+    audience: "refresh",
+  });
 
   return {
     accessToken: {

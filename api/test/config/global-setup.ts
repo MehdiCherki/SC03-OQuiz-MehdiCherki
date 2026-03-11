@@ -3,6 +3,7 @@ import type { Server } from "node:http";
 import { after, before, beforeEach, type TestContext } from "node:test";
 import { app } from "../../src/app.ts";
 import { prisma } from "../../src/models/index.ts";
+import { resetRateLimiters } from "../../src/middlewares/rate-limit.middleware.ts";
 
 // ================================================================================
 // Objectif de ce fichier : mettre en place l'environnement des tests d'intégration
@@ -62,6 +63,7 @@ beforeEach(async t => {
   (t as TestContext).mock.method(console, "info", () => {});
 
   await truncateTables();
+  resetRateLimiters();
 });
 
 // Hook after : s'exécute une fois après l'ensemble des tests

@@ -20,13 +20,13 @@ export function checkRoles(roles: Role[]) {
 }
 
 function extractAccessToken(req: Request) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  const parts = req.headers.authorization?.split(" ");
+  if (!parts || parts.length !== 2 || parts[0] !== "Bearer" || !parts[1]) {
     throw new UnauthorizedError(
       "Vous n'êtes pas autorisé à accéder à cette resource",
     );
   }
-  return authHeader.split(" ")[1];
+  return parts[1];
 }
 
 function verifyAndDecodeJWT(accessToken: string): JwtPayload {
