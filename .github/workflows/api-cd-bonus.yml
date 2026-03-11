@@ -24,13 +24,13 @@ jobs:
     steps:
       # Récupérer le code du dépôt
       - name: Checkout code
-        uses: actions/checkout@v4 # v4 est la version actuelle, vérifier la dernière
+        uses: actions/checkout@v5 # v5 est la version actuelle, vérifier la dernière
 
       # Mettre en place Node.js
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: '22' # Spécifie la version de Node.js
+          node-version: "24" # Spécifie la version de Node.js
 
       # Installer les dépendances (commande shell)
       - name: Install dependencies
@@ -46,7 +46,7 @@ jobs:
 
       # Connexion à DockerHub
       - name: Login to DockerHub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
