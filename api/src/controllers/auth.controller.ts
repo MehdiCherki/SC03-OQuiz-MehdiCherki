@@ -112,7 +112,9 @@ export async function getAuthenticatedUser(req: Request, res: Response) {
   // req.user est garanti par le middleware checkRoles en amont
   const user = await prisma.user.findUnique({ where: { id: req.user!.id } });
   if (!user) {
-    throw new UnauthorizedError("Vous n'êtes pas autorisé à accéder à cette resource");
+    throw new UnauthorizedError(
+      "Vous n'êtes pas autorisé à accéder à cette resource",
+    );
   }
   res.json({
     id: user.id,
@@ -136,7 +138,8 @@ export async function logoutUser(req: Request, res: Response) {
 }
 
 export async function refreshAccessToken(req: Request, res: Response) {
-  const receivedRefreshToken = req.body?.refreshToken ?? req.cookies.refreshToken;
+  const receivedRefreshToken =
+    req.body?.refreshToken ?? req.cookies.refreshToken;
 
   if (!receivedRefreshToken) {
     throw new UnauthorizedError(
@@ -200,6 +203,7 @@ function setRefreshTokenCookie(res: Response, refreshToken: Token) {
 
 async function replaceRefreshTokenInDatabase(refreshToken: Token, user: User) {
   await prisma.refreshToken.deleteMany({ where: { user_id: user.id } });
+
   await prisma.refreshToken.create({
     data: {
       token: refreshToken.token,
