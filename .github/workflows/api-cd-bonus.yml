@@ -34,7 +34,7 @@ jobs:
 
       # Installer les dépendances (commande shell)
       - name: Install dependencies
-        run: npm install
+        run: npm install --prefix api
 
       # Généer le client Prisma
       - name: Generate Prisma client
