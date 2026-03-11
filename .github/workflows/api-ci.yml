@@ -27,13 +27,13 @@ jobs:
     steps:
       # Récupérer le code du dépôt dans le runner (action officiel)
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Mettre en place Node.js
       - name: Install Node 22
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: '22' # Spécifie la version de Node.js
+          node-version: "22" # Spécifie la version de Node.js
 
       # Installer les dépendances
       - name: Install dependencies
