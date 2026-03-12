@@ -31,7 +31,9 @@ function extractAccessToken(req: Request) {
 
 function verifyAndDecodeJWT(accessToken: string): JwtPayload {
   try {
-    const payload = jwt.verify(accessToken, config.jwtSecret, { audience: "access" }) as JwtPayload;
+    const payload = jwt.verify(accessToken, config.jwtSecret, {
+      audience: "access",
+    }) as JwtPayload;
     return payload;
   } catch (error) {
     logger.warn(error);

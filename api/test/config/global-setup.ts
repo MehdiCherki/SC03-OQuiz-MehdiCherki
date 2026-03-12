@@ -59,7 +59,7 @@ before(() => {
 });
 
 // Hook beforeEach : s'exécute une fois avant chaque test
-beforeEach(async t => {
+beforeEach(async (t) => {
   (t as TestContext).mock.method(console, "info", () => {});
 
   await truncateTables();

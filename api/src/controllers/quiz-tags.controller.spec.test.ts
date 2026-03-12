@@ -37,7 +37,9 @@ describe("quiz tags", () => {
   describe("[PUT] /api/quizzes/:id/tags/:tagId", () => {
     it("should add a tag to a quiz", async () => {
       // Act
-      const { status } = await authorRequester.put(`/quizzes/${quizId}/tags/${tagId}`);
+      const { status } = await authorRequester.put(
+        `/quizzes/${quizId}/tags/${tagId}`,
+      );
 
       // Assert
       assert.strictEqual(status, 204);
@@ -50,21 +52,29 @@ describe("quiz tags", () => {
     it("should be idempotent (adding the same tag twice does not fail)", async () => {
       // Act
       await authorRequester.put(`/quizzes/${quizId}/tags/${tagId}`);
-      const { status } = await authorRequester.put(`/quizzes/${quizId}/tags/${tagId}`);
+      const { status } = await authorRequester.put(
+        `/quizzes/${quizId}/tags/${tagId}`,
+      );
 
       // Assert
       assert.strictEqual(status, 204);
-      const count = await prisma.quizHasTag.count({ where: { quiz_id: quizId } });
+      const count = await prisma.quizHasTag.count({
+        where: { quiz_id: quizId },
+      });
       assert.strictEqual(count, 1);
     });
 
     it("should return 404 when the quiz does not exist", async () => {
-      const { status } = await authorRequester.put(`/quizzes/9999/tags/${tagId}`);
+      const { status } = await authorRequester.put(
+        `/quizzes/9999/tags/${tagId}`,
+      );
       assert.strictEqual(status, 404);
     });
 
     it("should return 404 when the tag does not exist", async () => {
-      const { status } = await authorRequester.put(`/quizzes/${quizId}/tags/9999`);
+      const { status } = await authorRequester.put(
+        `/quizzes/${quizId}/tags/9999`,
+      );
       assert.strictEqual(status, 404);
     });
 
@@ -82,14 +92,18 @@ describe("quiz tags", () => {
       const otherRequester = buildAuthedRequester(otherAuthor);
 
       // Act
-      const { status } = await otherRequester.put(`/quizzes/${quizId}/tags/${tagId}`);
+      const { status } = await otherRequester.put(
+        `/quizzes/${quizId}/tags/${tagId}`,
+      );
 
       // Assert
       assert.strictEqual(status, 403);
     });
 
     it("should allow an admin to add a tag to any quiz", async () => {
-      const { status } = await authedRequester.put(`/quizzes/${quizId}/tags/${tagId}`);
+      const { status } = await authedRequester.put(
+        `/quizzes/${quizId}/tags/${tagId}`,
+      );
       assert.strictEqual(status, 204);
     });
   });
@@ -99,10 +113,14 @@ describe("quiz tags", () => {
   describe("[DELETE] /api/quizzes/:id/tags/:tagId", () => {
     it("should remove a tag from a quiz", async () => {
       // Arrange
-      await prisma.quizHasTag.create({ data: { quiz_id: quizId, tag_id: tagId } });
+      await prisma.quizHasTag.create({
+        data: { quiz_id: quizId, tag_id: tagId },
+      });
 
       // Act
-      const { status } = await authorRequester.delete(`/quizzes/${quizId}/tags/${tagId}`);
+      const { status } = await authorRequester.delete(
+        `/quizzes/${quizId}/tags/${tagId}`,
+      );
 
       // Assert
       assert.strictEqual(status, 204);
@@ -113,13 +131,17 @@ describe("quiz tags", () => {
     });
 
     it("should return 404 when the quiz does not exist", async () => {
-      const { status } = await authorRequester.delete(`/quizzes/9999/tags/${tagId}`);
+      const { status } = await authorRequester.delete(
+        `/quizzes/9999/tags/${tagId}`,
+      );
       assert.strictEqual(status, 404);
     });
 
     it("should return 404 when the tag is not associated with the quiz", async () => {
       // Act — tag existe mais n'est pas lié au quiz
-      const { status } = await authorRequester.delete(`/quizzes/${quizId}/tags/${tagId}`);
+      const { status } = await authorRequester.delete(
+        `/quizzes/${quizId}/tags/${tagId}`,
+      );
       assert.strictEqual(status, 404);
     });
 
@@ -134,11 +156,15 @@ describe("quiz tags", () => {
           role: "author",
         },
       });
-      await prisma.quizHasTag.create({ data: { quiz_id: quizId, tag_id: tagId } });
+      await prisma.quizHasTag.create({
+        data: { quiz_id: quizId, tag_id: tagId },
+      });
       const otherRequester = buildAuthedRequester(otherAuthor);
 
       // Act
-      const { status } = await otherRequester.delete(`/quizzes/${quizId}/tags/${tagId}`);
+      const { status } = await otherRequester.delete(
+        `/quizzes/${quizId}/tags/${tagId}`,
+      );
 
       // Assert
       assert.strictEqual(status, 403);
@@ -146,10 +172,14 @@ describe("quiz tags", () => {
 
     it("should allow an admin to remove a tag from any quiz", async () => {
       // Arrange
-      await prisma.quizHasTag.create({ data: { quiz_id: quizId, tag_id: tagId } });
+      await prisma.quizHasTag.create({
+        data: { quiz_id: quizId, tag_id: tagId },
+      });
 
       // Act
-      const { status } = await authedRequester.delete(`/quizzes/${quizId}/tags/${tagId}`);
+      const { status } = await authedRequester.delete(
+        `/quizzes/${quizId}/tags/${tagId}`,
+      );
       assert.strictEqual(status, 204);
     });
   });

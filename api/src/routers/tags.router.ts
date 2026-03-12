@@ -19,7 +19,11 @@ export const router = Router();
  *               type: array
  *               items: { $ref: '#/components/schemas/Tag' }
  */
-router.get("/tags", checkRoles(["admin", "author", "member"]), tagsController.getAllTags);
+router.get(
+  "/tags",
+  checkRoles(["admin", "author", "member"]),
+  tagsController.getAllTags,
+);
 
 /**
  * @openapi
@@ -41,7 +45,11 @@ router.get("/tags", checkRoles(["admin", "author", "member"]), tagsController.ge
  *       404:
  *         description: Tag introuvable
  */
-router.get("/tags/:id", checkRoles(["admin", "author", "member"]), tagsController.getOneTag);
+router.get(
+  "/tags/:id",
+  checkRoles(["admin", "author", "member"]),
+  tagsController.getOneTag,
+);
 
 /**
  * @openapi

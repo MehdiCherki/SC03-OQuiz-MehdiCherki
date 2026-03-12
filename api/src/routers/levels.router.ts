@@ -19,7 +19,11 @@ export const router = Router();
  *               type: array
  *               items: { $ref: '#/components/schemas/Level' }
  */
-router.get("/levels", checkRoles(["admin", "author", "member"]), levelsController.getAllLevels);
+router.get(
+  "/levels",
+  checkRoles(["admin", "author", "member"]),
+  levelsController.getAllLevels,
+);
 
 /**
  * @openapi
@@ -41,7 +45,11 @@ router.get("/levels", checkRoles(["admin", "author", "member"]), levelsControlle
  *       404:
  *         description: Niveau introuvable
  */
-router.get("/levels/:id", checkRoles(["admin", "author", "member"]), levelsController.getOneLevel);
+router.get(
+  "/levels/:id",
+  checkRoles(["admin", "author", "member"]),
+  levelsController.getOneLevel,
+);
 
 /**
  * @openapi
@@ -98,7 +106,11 @@ router.post("/levels", checkRoles(["admin"]), levelsController.createLevel);
  *       409:
  *         description: Nom déjà utilisé
  */
-router.patch("/levels/:id", checkRoles(["admin"]), levelsController.updateLevel);
+router.patch(
+  "/levels/:id",
+  checkRoles(["admin"]),
+  levelsController.updateLevel,
+);
 
 /**
  * @openapi
@@ -117,4 +129,8 @@ router.patch("/levels/:id", checkRoles(["admin"]), levelsController.updateLevel)
  *       404:
  *         description: Niveau introuvable
  */
-router.delete("/levels/:id", checkRoles(["admin"]), levelsController.deleteLevel);
+router.delete(
+  "/levels/:id",
+  checkRoles(["admin"]),
+  levelsController.deleteLevel,
+);

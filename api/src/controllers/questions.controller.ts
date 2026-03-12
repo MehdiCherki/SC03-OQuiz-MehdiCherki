@@ -6,7 +6,9 @@ import { parseIdFromParams } from "./utils.ts";
 
 function assertQuizAuthor(quizAuthorId: number, userId: number) {
   if (quizAuthorId !== userId) {
-    throw new ForbiddenError("Vous ne pouvez modifier que les questions de vos propres quizzes");
+    throw new ForbiddenError(
+      "Vous ne pouvez modifier que les questions de vos propres quizzes",
+    );
   }
 }
 
@@ -14,9 +16,13 @@ export async function createQuestion(req: Request, res: Response) {
   const quizId = await parseIdFromParams(req.params.id);
 
   const quiz = await prisma.quiz.findUnique({ where: { id: quizId } });
-  if (!quiz) { throw new NotFoundError("Quiz not found"); }
+  if (!quiz) {
+    throw new NotFoundError("Quiz not found");
+  }
 
-  if (req.user!.role !== "admin") { assertQuizAuthor(quiz.author_id, req.user!.id); }
+  if (req.user!.role !== "admin") {
+    assertQuizAuthor(quiz.author_id, req.user!.id);
+  }
 
   const schema = z.object({
     description: z.string().min(1),
@@ -38,9 +44,13 @@ export async function updateQuestion(req: Request, res: Response) {
     where: { id: questionId },
     include: { quiz: true },
   });
-  if (!question) { throw new NotFoundError("Question not found"); }
+  if (!question) {
+    throw new NotFoundError("Question not found");
+  }
 
-  if (req.user!.role !== "admin") { assertQuizAuthor(question.quiz.author_id, req.user!.id); }
+  if (req.user!.role !== "admin") {
+    assertQuizAuthor(question.quiz.author_id, req.user!.id);
+  }
 
   const schema = z.object({
     description: z.string().min(1).optional(),
@@ -63,9 +73,13 @@ export async function deleteQuestion(req: Request, res: Response) {
     where: { id: questionId },
     include: { quiz: true },
   });
-  if (!question) { throw new NotFoundError("Question not found"); }
+  if (!question) {
+    throw new NotFoundError("Question not found");
+  }
 
-  if (req.user!.role !== "admin") { assertQuizAuthor(question.quiz.author_id, req.user!.id); }
+  if (req.user!.role !== "admin") {
+    assertQuizAuthor(question.quiz.author_id, req.user!.id);
+  }
 
   await prisma.question.delete({ where: { id: questionId } });
 
@@ -79,9 +93,13 @@ export async function createChoice(req: Request, res: Response) {
     where: { id: questionId },
     include: { quiz: true },
   });
-  if (!question) { throw new NotFoundError("Question not found"); }
+  if (!question) {
+    throw new NotFoundError("Question not found");
+  }
 
-  if (req.user!.role !== "admin") { assertQuizAuthor(question.quiz.author_id, req.user!.id); }
+  if (req.user!.role !== "admin") {
+    assertQuizAuthor(question.quiz.author_id, req.user!.id);
+  }
 
   const schema = z.object({
     description: z.string().min(1),

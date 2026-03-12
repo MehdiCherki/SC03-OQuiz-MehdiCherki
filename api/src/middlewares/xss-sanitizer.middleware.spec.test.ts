@@ -14,19 +14,31 @@ describe("xssSanitizer", () => {
     });
 
     assert.ok(level.name, "Le level doit être créé");
-    assert.ok(!level.name.includes("<script>"), "La balise <script> ne doit pas être conservée");
-    assert.ok(!level.name.includes("alert("), "Le contenu du script ne doit pas être conservé");
+    assert.ok(
+      !level.name.includes("<script>"),
+      "La balise <script> ne doit pas être conservée",
+    );
+    assert.ok(
+      !level.name.includes("alert("),
+      "Le contenu du script ne doit pas être conservé",
+    );
   });
 
   it("should strip onerror event handler from attributes", async () => {
     // Le sanitizer retire les handlers d'événements (onerror, onclick…) des attributs HTML.
     const { data: level } = await authedRequester.post("/levels", {
-      name: "Level <img src=\"x\" onerror=\"alert(1)\"> Name",
+      name: 'Level <img src="x" onerror="alert(1)"> Name',
     });
 
     assert.ok(level.name, "Le level doit être créé");
-    assert.ok(!level.name.includes("onerror"), "L'attribut onerror ne doit pas être conservé");
-    assert.ok(!level.name.includes("alert("), "Le handler onerror ne doit pas être conservé");
+    assert.ok(
+      !level.name.includes("onerror"),
+      "L'attribut onerror ne doit pas être conservé",
+    );
+    assert.ok(
+      !level.name.includes("alert("),
+      "Le handler onerror ne doit pas être conservé",
+    );
   });
 
   it("should strip javascript: protocol from href attributes", async () => {
@@ -50,7 +62,10 @@ describe("xssSanitizer", () => {
 
     // Assert
     assert.ok(quiz.description, "Le quiz doit être créé");
-    assert.ok(!quiz.description.includes("javascript:"), "Le protocole javascript: ne doit pas être conservé");
+    assert.ok(
+      !quiz.description.includes("javascript:"),
+      "Le protocole javascript: ne doit pas être conservé",
+    );
   });
 
   it("should not alter plain text without HTML", async () => {
@@ -78,11 +93,17 @@ describe("xssSanitizer", () => {
     // Act — les deux champs contiennent des vecteurs XSS
     const { data: quiz } = await authorRequester.post("/quizzes", {
       title: "Quiz <script>evil()</script> Test",
-      description: "Desc <img src=\"x\" onclick=\"steal()\"> text",
+      description: 'Desc <img src="x" onclick="steal()"> text',
     });
 
     // Assert — les deux champs doivent être nettoyés
-    assert.ok(!quiz.title.includes("<script>"), "title : balise script supprimée");
-    assert.ok(!quiz.description.includes("onclick"), "description : handler onclick supprimé");
+    assert.ok(
+      !quiz.title.includes("<script>"),
+      "title : balise script supprimée",
+    );
+    assert.ok(
+      !quiz.description.includes("onclick"),
+      "description : handler onclick supprimé",
+    );
   });
 });

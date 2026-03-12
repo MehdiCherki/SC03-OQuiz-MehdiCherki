@@ -30,7 +30,9 @@ export async function getQuizQuestions(req: Request, res: Response) {
   const quizId = await parseIdFromParams(req.params.id);
 
   const quiz = await prisma.quiz.findUnique({ where: { id: quizId } });
-  if (!quiz) { throw new NotFoundError("Quiz not found"); }
+  if (!quiz) {
+    throw new NotFoundError("Quiz not found");
+  }
 
   const questions = await prisma.question.findMany({
     where: { quiz_id: quizId },
@@ -47,7 +49,9 @@ export async function getOneQuiz(req: Request, res: Response) {
     where: { id: quizId },
     include: quizWithQuestionsAndChoices,
   });
-  if (!quiz) { throw new NotFoundError("Quiz not found"); }
+  if (!quiz) {
+    throw new NotFoundError("Quiz not found");
+  }
 
   res.json(quiz);
 }
@@ -58,7 +62,9 @@ export async function createQuiz(req: Request, res: Response) {
     description: z.string().optional(),
   });
 
-  const { title, description } = await createQuizBodySchema.parseAsync(req.body);
+  const { title, description } = await createQuizBodySchema.parseAsync(
+    req.body,
+  );
 
   const createdQuiz = await prisma.quiz.create({
     data: {
@@ -78,10 +84,14 @@ export async function updateQuiz(req: Request, res: Response) {
     title: z.string().min(1).optional(),
     description: z.string().nullable().optional(),
   });
-  const { title, description } = await updateQuizBodySchema.parseAsync(req.body);
+  const { title, description } = await updateQuizBodySchema.parseAsync(
+    req.body,
+  );
 
   const foundQuiz = await prisma.quiz.findUnique({ where: { id: quizId } });
-  if (!foundQuiz) { throw new NotFoundError(`Quiz not found: ${quizId}`); }
+  if (!foundQuiz) {
+    throw new NotFoundError(`Quiz not found: ${quizId}`);
+  }
 
   if (req.user!.role !== "admin" && foundQuiz.author_id !== req.user!.id) {
     throw new ForbiddenError("Vous ne pouvez modifier que vos propres quizzes");
@@ -100,14 +110,18 @@ export async function addTagToQuiz(req: Request, res: Response) {
   const tagId = await parseIdFromParams(req.params.tagId);
 
   const quiz = await prisma.quiz.findUnique({ where: { id: quizId } });
-  if (!quiz) { throw new NotFoundError("Quiz not found"); }
+  if (!quiz) {
+    throw new NotFoundError("Quiz not found");
+  }
 
   if (req.user!.role !== "admin" && quiz.author_id !== req.user!.id) {
     throw new ForbiddenError("Vous ne pouvez modifier que vos propres quizzes");
   }
 
   const tag = await prisma.tag.findUnique({ where: { id: tagId } });
-  if (!tag) { throw new NotFoundError("Tag not found"); }
+  if (!tag) {
+    throw new NotFoundError("Tag not found");
+  }
 
   await prisma.quizHasTag.upsert({
     where: { quiz_id_tag_id: { quiz_id: quizId, tag_id: tagId } },
@@ -123,7 +137,9 @@ export async function removeTagFromQuiz(req: Request, res: Response) {
   const tagId = await parseIdFromParams(req.params.tagId);
 
   const quiz = await prisma.quiz.findUnique({ where: { id: quizId } });
-  if (!quiz) { throw new NotFoundError("Quiz not found"); }
+  if (!quiz) {
+    throw new NotFoundError("Quiz not found");
+  }
 
   if (req.user!.role !== "admin" && quiz.author_id !== req.user!.id) {
     throw new ForbiddenError("Vous ne pouvez modifier que vos propres quizzes");
@@ -132,7 +148,9 @@ export async function removeTagFromQuiz(req: Request, res: Response) {
   const link = await prisma.quizHasTag.findUnique({
     where: { quiz_id_tag_id: { quiz_id: quizId, tag_id: tagId } },
   });
-  if (!link) { throw new NotFoundError("Ce tag n'est pas associé à ce quiz"); }
+  if (!link) {
+    throw new NotFoundError("Ce tag n'est pas associé à ce quiz");
+  }
 
   await prisma.quizHasTag.delete({
     where: { quiz_id_tag_id: { quiz_id: quizId, tag_id: tagId } },
@@ -145,10 +163,14 @@ export async function deleteQuiz(req: Request, res: Response) {
   const quizId = await parseIdFromParams(req.params.id);
 
   const quiz = await prisma.quiz.findUnique({ where: { id: quizId } });
-  if (!quiz) { throw new NotFoundError("Quiz not found"); }
+  if (!quiz) {
+    throw new NotFoundError("Quiz not found");
+  }
 
   if (req.user!.role !== "admin" && quiz.author_id !== req.user!.id) {
-    throw new ForbiddenError("Vous ne pouvez supprimer que vos propres quizzes");
+    throw new ForbiddenError(
+      "Vous ne pouvez supprimer que vos propres quizzes",
+    );
   }
 
   await prisma.quiz.delete({ where: { id: quizId } });

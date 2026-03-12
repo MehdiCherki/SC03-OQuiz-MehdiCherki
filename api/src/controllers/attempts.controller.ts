@@ -1,7 +1,11 @@
 import type { Request, Response } from "express";
 import z from "zod";
 import { prisma } from "../models/index.ts";
-import { BadRequestError, ForbiddenError, NotFoundError } from "../lib/errors.ts";
+import {
+  BadRequestError,
+  ForbiddenError,
+  NotFoundError,
+} from "../lib/errors.ts";
 import { parseIdFromParams } from "./utils.ts";
 
 export async function createAttempt(req: Request, res: Response) {
@@ -13,7 +17,9 @@ export async function createAttempt(req: Request, res: Response) {
       questions: { include: { choices: true } },
     },
   });
-  if (!quiz) { throw new NotFoundError("Quiz not found"); }
+  if (!quiz) {
+    throw new NotFoundError("Quiz not found");
+  }
 
   const answersSchema = z.array(
     z.object({
@@ -27,12 +33,16 @@ export async function createAttempt(req: Request, res: Response) {
   const results = answers.map(({ question_id, user_choice_id }) => {
     const question = quiz.questions.find((q) => q.id === question_id);
     if (!question) {
-      throw new BadRequestError(`La question ${question_id} n'appartient pas à ce quiz`);
+      throw new BadRequestError(
+        `La question ${question_id} n'appartient pas à ce quiz`,
+      );
     }
 
     const userChoice = question.choices.find((c) => c.id === user_choice_id);
     if (!userChoice) {
-      throw new BadRequestError(`Le choix ${user_choice_id} n'appartient pas à la question ${question_id}`);
+      throw new BadRequestError(
+        `Le choix ${user_choice_id} n'appartient pas à la question ${question_id}`,
+      );
     }
 
     const goodChoice = question.choices.find((c) => c.is_valid);
@@ -63,11 +73,15 @@ export async function getQuizAttempts(req: Request, res: Response) {
   const quizId = await parseIdFromParams(req.params.id);
 
   const quiz = await prisma.quiz.findUnique({ where: { id: quizId } });
-  if (!quiz) { throw new NotFoundError("Quiz not found"); }
+  if (!quiz) {
+    throw new NotFoundError("Quiz not found");
+  }
 
   // Seul l'admin ou l'auteur du quiz peut voir les tentatives
   if (req.user!.role !== "admin" && quiz.author_id !== req.user!.id) {
-    throw new ForbiddenError("Vous ne pouvez consulter que les tentatives de vos propres quizzes");
+    throw new ForbiddenError(
+      "Vous ne pouvez consulter que les tentatives de vos propres quizzes",
+    );
   }
 
   const attempts = await prisma.attempt.findMany({

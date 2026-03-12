@@ -23,7 +23,9 @@ describe("[GET] /api/tags", () => {
   it("should return tags with their children", async () => {
     // Arrange
     const parent = await prisma.tag.create({ data: { name: "Web" } });
-    await prisma.tag.create({ data: { name: "Frontend", parent_tag_id: parent.id } });
+    await prisma.tag.create({
+      data: { name: "Frontend", parent_tag_id: parent.id },
+    });
 
     // Act
     const { data: tags } = await authedRequester.get("/tags");
@@ -63,7 +65,9 @@ describe("[GET] /api/tags/:id", () => {
   it("should return the tag with its children", async () => {
     // Arrange
     const parent = await prisma.tag.create({ data: { name: "Backend" } });
-    await prisma.tag.create({ data: { name: "Express", parent_tag_id: parent.id } });
+    await prisma.tag.create({
+      data: { name: "Express", parent_tag_id: parent.id },
+    });
 
     // Act
     const { data: tag } = await authedRequester.get(`/tags/${parent.id}`);
@@ -92,7 +96,10 @@ describe("[POST] /api/tags", () => {
     const body = { name: "Vue.js" };
 
     // Act
-    const { data: createdTag, status } = await authedRequester.post("/tags", body);
+    const { data: createdTag, status } = await authedRequester.post(
+      "/tags",
+      body,
+    );
 
     // Assert
     assert.strictEqual(status, 201);
@@ -110,7 +117,10 @@ describe("[POST] /api/tags", () => {
     const body = { name: "Angular", parent_tag_id: parent.id };
 
     // Act
-    const { data: createdTag, status } = await authedRequester.post("/tags", body);
+    const { data: createdTag, status } = await authedRequester.post(
+      "/tags",
+      body,
+    );
 
     // Assert
     assert.strictEqual(status, 201);
@@ -155,7 +165,9 @@ describe("[POST] /api/tags", () => {
     const authorRequester = buildAuthedRequester(author);
 
     // Act
-    const { status } = await authorRequester.post("/tags", { name: "Tag d'auteur" });
+    const { status } = await authorRequester.post("/tags", {
+      name: "Tag d'auteur",
+    });
 
     // Assert
     assert.strictEqual(status, 201);
@@ -175,7 +187,9 @@ describe("[POST] /api/tags", () => {
     const memberRequester = buildAuthedRequester(member);
 
     // Act
-    const { status } = await memberRequester.post("/tags", { name: "Tag interdit" });
+    const { status } = await memberRequester.post("/tags", {
+      name: "Tag interdit",
+    });
 
     // Assert
     assert.strictEqual(status, 403);
@@ -185,11 +199,16 @@ describe("[POST] /api/tags", () => {
 describe("[PATCH] /api/tags/:id", () => {
   it("should update the tag name in the database", async () => {
     // Arrange
-    const tagToUpdate = await prisma.tag.create({ data: { name: "A mettre à jour" } });
+    const tagToUpdate = await prisma.tag.create({
+      data: { name: "A mettre à jour" },
+    });
     const NEW_NAME = "Nouveau nom du tag";
 
     // Act
-    const httpResponse = await authedRequester.patch(`/tags/${tagToUpdate.id}`, { name: NEW_NAME });
+    const httpResponse = await authedRequester.patch(
+      `/tags/${tagToUpdate.id}`,
+      { name: NEW_NAME },
+    );
 
     // Assert
     assert.strictEqual(httpResponse.status, 200);
@@ -216,7 +235,10 @@ describe("[PATCH] /api/tags/:id", () => {
     const UNEXISTING_TAG_ID = 42;
 
     // Act
-    const { status } = await authedRequester.patch(`/tags/${UNEXISTING_TAG_ID}`, { name: "Nouveau" });
+    const { status } = await authedRequester.patch(
+      `/tags/${UNEXISTING_TAG_ID}`,
+      { name: "Nouveau" },
+    );
 
     // Assert
     assert.strictEqual(status, 404);
@@ -225,12 +247,17 @@ describe("[PATCH] /api/tags/:id", () => {
   it("should return a 409 if the new name is already taken by another tag", async () => {
     // Arrange
     await prisma.tag.create({ data: { name: "Nom existant" } });
-    const tagToUpdate = await prisma.tag.create({ data: { name: "A renommer" } });
+    const tagToUpdate = await prisma.tag.create({
+      data: { name: "A renommer" },
+    });
 
     // Act
-    const httpResponse = await authedRequester.patch(`/tags/${tagToUpdate.id}`, {
-      name: "Nom existant",
-    });
+    const httpResponse = await authedRequester.patch(
+      `/tags/${tagToUpdate.id}`,
+      {
+        name: "Nom existant",
+      },
+    );
 
     // Assert
     assert.strictEqual(httpResponse.status, 409);
@@ -256,7 +283,9 @@ describe("[DELETE] /api/tags/:id", () => {
     const UNEXISTING_TAG_ID = 42;
 
     // Act
-    const { status } = await authedRequester.delete(`/tags/${UNEXISTING_TAG_ID}`);
+    const { status } = await authedRequester.delete(
+      `/tags/${UNEXISTING_TAG_ID}`,
+    );
 
     // Assert
     assert.equal(status, 404);
@@ -264,14 +293,20 @@ describe("[DELETE] /api/tags/:id", () => {
 
   it("should set children tags parent to null when parent tag is deleted", async () => {
     // Arrange
-    const parent = await prisma.tag.create({ data: { name: "Parent à supprimer" } });
-    const child = await prisma.tag.create({ data: { name: "Enfant", parent_tag_id: parent.id } });
+    const parent = await prisma.tag.create({
+      data: { name: "Parent à supprimer" },
+    });
+    const child = await prisma.tag.create({
+      data: { name: "Enfant", parent_tag_id: parent.id },
+    });
 
     // Act
     await authedRequester.delete(`/tags/${parent.id}`);
 
     // Assert
-    const updatedChild = await prisma.tag.findUnique({ where: { id: child.id } });
+    const updatedChild = await prisma.tag.findUnique({
+      where: { id: child.id },
+    });
     assert.strictEqual(updatedChild?.parent_tag_id, null);
   });
 });

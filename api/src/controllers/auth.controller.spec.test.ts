@@ -144,7 +144,12 @@ describe("[POST] /auth/logout", () => {
   it("should return a 204 status and new cookies to unset existing ones", async () => {
     // ARRANGE
     const user = await prisma.user.create({
-      data: { firstname: "John", lastname: "Doe", email: "john@oclock.io", password: "password" },
+      data: {
+        firstname: "John",
+        lastname: "Doe",
+        email: "john@oclock.io",
+        password: "password",
+      },
     });
     const { accessToken } = generateAuthTokens(user);
 
@@ -159,7 +164,10 @@ describe("[POST] /auth/logout", () => {
     // Les cookies doivent être effacés : valeur vide + date d'expiration dans le passé
     assert.match(httpResponse.headers.get("set-cookie")!, /accessToken=;/);
     assert.match(httpResponse.headers.get("set-cookie")!, /refreshToken=;/);
-    assert.match(httpResponse.headers.get("set-cookie")!, /Expires=Thu, 01 Jan 1970/);
+    assert.match(
+      httpResponse.headers.get("set-cookie")!,
+      /Expires=Thu, 01 Jan 1970/,
+    );
   });
 });
 
@@ -207,7 +215,10 @@ describe("[POST] /auth/refresh", () => {
       },
     });
     // JWT signé avec la bonne audience mais déjà expiré
-    const expiredToken = jwt.sign({ userId: user.id }, config.jwtSecret, { expiresIn: 0, audience: "refresh" });
+    const expiredToken = jwt.sign({ userId: user.id }, config.jwtSecret, {
+      expiresIn: 0,
+      audience: "refresh",
+    });
     await prisma.refreshToken.create({
       data: {
         token: expiredToken,

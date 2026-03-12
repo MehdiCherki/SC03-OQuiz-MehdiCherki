@@ -42,7 +42,10 @@ describe("questions & choices", () => {
       assert.strictEqual(status, 201);
       assert.ok(question.id);
       assert.strictEqual(question.quiz_id, quizId);
-      assert.strictEqual(question.description, "Quelle est la capitale de la France ?");
+      assert.strictEqual(
+        question.description,
+        "Quelle est la capitale de la France ?",
+      );
     });
 
     it("should create a question with a level", async () => {
@@ -80,9 +83,12 @@ describe("questions & choices", () => {
       const otherRequester = buildAuthedRequester(otherAuthor);
 
       // Act
-      const { status } = await otherRequester.post(`/quizzes/${quizId}/questions`, {
-        description: "Tentative de piratage",
-      });
+      const { status } = await otherRequester.post(
+        `/quizzes/${quizId}/questions`,
+        {
+          description: "Tentative de piratage",
+        },
+      );
 
       // Assert
       assert.strictEqual(status, 403);
@@ -102,18 +108,24 @@ describe("questions & choices", () => {
       const memberRequester = buildAuthedRequester(member);
 
       // Act
-      const { status } = await memberRequester.post(`/quizzes/${quizId}/questions`, {
-        description: "Question interdite",
-      });
+      const { status } = await memberRequester.post(
+        `/quizzes/${quizId}/questions`,
+        {
+          description: "Question interdite",
+        },
+      );
 
       // Assert
       assert.strictEqual(status, 403);
     });
 
     it("should allow an admin to create a question in any quiz", async () => {
-      const { status } = await authedRequester.post(`/quizzes/${quizId}/questions`, {
-        description: "Question de l'admin",
-      });
+      const { status } = await authedRequester.post(
+        `/quizzes/${quizId}/questions`,
+        {
+          description: "Question de l'admin",
+        },
+      );
       assert.strictEqual(status, 201);
     });
   });
@@ -162,9 +174,12 @@ describe("questions & choices", () => {
       const otherRequester = buildAuthedRequester(otherAuthor);
 
       // Act
-      const { status } = await otherRequester.patch(`/questions/${question.id}`, {
-        description: "Piraté",
-      });
+      const { status } = await otherRequester.patch(
+        `/questions/${question.id}`,
+        {
+          description: "Piraté",
+        },
+      );
 
       // Assert
       assert.strictEqual(status, 403);
@@ -177,9 +192,12 @@ describe("questions & choices", () => {
       });
 
       // Act
-      const { status } = await authedRequester.patch(`/questions/${question.id}`, {
-        description: "Modifiée par l'admin",
-      });
+      const { status } = await authedRequester.patch(
+        `/questions/${question.id}`,
+        {
+          description: "Modifiée par l'admin",
+        },
+      );
 
       // Assert
       assert.strictEqual(status, 200);
@@ -196,7 +214,9 @@ describe("questions & choices", () => {
       });
 
       // Act
-      const { status } = await authorRequester.delete(`/questions/${question.id}`);
+      const { status } = await authorRequester.delete(
+        `/questions/${question.id}`,
+      );
 
       // Assert
       assert.strictEqual(status, 204);
@@ -244,7 +264,9 @@ describe("questions & choices", () => {
       const otherRequester = buildAuthedRequester(otherAuthor);
 
       // Act
-      const { status } = await otherRequester.delete(`/questions/${question.id}`);
+      const { status } = await otherRequester.delete(
+        `/questions/${question.id}`,
+      );
 
       // Assert
       assert.strictEqual(status, 403);
@@ -299,10 +321,13 @@ describe("questions & choices", () => {
       const otherRequester = buildAuthedRequester(otherAuthor);
 
       // Act
-      const { status } = await otherRequester.post(`/questions/${question.id}/choices`, {
-        description: "Choix piraté",
-        is_valid: false,
-      });
+      const { status } = await otherRequester.post(
+        `/questions/${question.id}/choices`,
+        {
+          description: "Choix piraté",
+          is_valid: false,
+        },
+      );
 
       // Assert
       assert.strictEqual(status, 403);

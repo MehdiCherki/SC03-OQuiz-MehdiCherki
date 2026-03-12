@@ -31,13 +31,20 @@ describe("attempts", () => {
     quizId = quiz.id;
 
     const question = await prisma.question.create({
-      data: { description: "Quelle est la capitale de la France ?", quiz_id: quizId },
+      data: {
+        description: "Quelle est la capitale de la France ?",
+        quiz_id: quizId,
+      },
     });
     questionId = question.id;
 
     const [validChoice, invalidChoice] = await Promise.all([
-      prisma.choice.create({ data: { description: "Paris", is_valid: true, question_id: questionId } }),
-      prisma.choice.create({ data: { description: "Lyon", is_valid: false, question_id: questionId } }),
+      prisma.choice.create({
+        data: { description: "Paris", is_valid: true, question_id: questionId },
+      }),
+      prisma.choice.create({
+        data: { description: "Lyon", is_valid: false, question_id: questionId },
+      }),
     ]);
     validChoiceId = validChoice.id;
     invalidChoiceId = invalidChoice.id;
@@ -60,9 +67,10 @@ describe("attempts", () => {
       const memberRequester = buildAuthedRequester(member);
 
       // Act
-      const { status, data } = await memberRequester.post(`/quizzes/${quizId}/attempts`, [
-        { question_id: questionId, user_choice_id: validChoiceId },
-      ]);
+      const { status, data } = await memberRequester.post(
+        `/quizzes/${quizId}/attempts`,
+        [{ question_id: questionId, user_choice_id: validChoiceId }],
+      );
 
       // Assert
       assert.strictEqual(status, 201);
@@ -74,9 +82,10 @@ describe("attempts", () => {
 
     it("should return correct results for each answer", async () => {
       // Act
-      const { data } = await authorRequester.post(`/quizzes/${quizId}/attempts`, [
-        { question_id: questionId, user_choice_id: validChoiceId },
-      ]);
+      const { data } = await authorRequester.post(
+        `/quizzes/${quizId}/attempts`,
+        [{ question_id: questionId, user_choice_id: validChoiceId }],
+      );
 
       // Assert
       assert.strictEqual(data.results.length, 1);
@@ -88,9 +97,10 @@ describe("attempts", () => {
 
     it("should score 0 when all answers are wrong", async () => {
       // Act
-      const { data } = await authorRequester.post(`/quizzes/${quizId}/attempts`, [
-        { question_id: questionId, user_choice_id: invalidChoiceId },
-      ]);
+      const { data } = await authorRequester.post(
+        `/quizzes/${quizId}/attempts`,
+        [{ question_id: questionId, user_choice_id: invalidChoiceId }],
+      );
 
       // Assert
       assert.strictEqual(data.attempt.score, 0);
@@ -105,7 +115,9 @@ describe("attempts", () => {
       ]);
 
       // Assert
-      const attempt = await prisma.attempt.findFirst({ where: { quiz_id: quizId } });
+      const attempt = await prisma.attempt.findFirst({
+        where: { quiz_id: quizId },
+      });
       assert.ok(attempt);
       assert.strictEqual(attempt.score, 1);
     });
@@ -118,11 +130,14 @@ describe("attempts", () => {
     });
 
     it("should return 401 when accessed without authentication", async () => {
-      const response = await fetch(`http://localhost:7357/api/quizzes/${quizId}/attempts`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify([]),
-      });
+      const response = await fetch(
+        `http://localhost:7357/api/quizzes/${quizId}/attempts`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify([]),
+        },
+      );
       assert.strictEqual(response.status, 401);
     });
   });
@@ -137,7 +152,9 @@ describe("attempts", () => {
       });
 
       // Act
-      const { status, data: attempts } = await authedRequester.get(`/quizzes/${quizId}/attempts`);
+      const { status, data: attempts } = await authedRequester.get(
+        `/quizzes/${quizId}/attempts`,
+      );
 
       // Assert
       assert.strictEqual(status, 200);
@@ -153,7 +170,9 @@ describe("attempts", () => {
       });
 
       // Act
-      const { status, data: attempts } = await authorRequester.get(`/quizzes/${quizId}/attempts`);
+      const { status, data: attempts } = await authorRequester.get(
+        `/quizzes/${quizId}/attempts`,
+      );
 
       // Assert
       assert.strictEqual(status, 200);
@@ -174,7 +193,9 @@ describe("attempts", () => {
       const otherRequester = buildAuthedRequester(otherAuthor);
 
       // Act
-      const { status } = await otherRequester.get(`/quizzes/${quizId}/attempts`);
+      const { status } = await otherRequester.get(
+        `/quizzes/${quizId}/attempts`,
+      );
 
       // Assert
       assert.strictEqual(status, 403);
@@ -194,7 +215,9 @@ describe("attempts", () => {
       const memberRequester = buildAuthedRequester(member);
 
       // Act
-      const { status } = await memberRequester.get(`/quizzes/${quizId}/attempts`);
+      const { status } = await memberRequester.get(
+        `/quizzes/${quizId}/attempts`,
+      );
 
       // Assert
       assert.strictEqual(status, 403);

@@ -5,7 +5,10 @@ import { RATE_LIMIT } from "./rate-limit.middleware.ts";
 const BASE_URL = `http://localhost:${process.env.PORT ?? 7357}/api`;
 
 // Payload invalide volontairement : on veut tester le rate limiter, pas le controller
-const invalidLoginPayload = JSON.stringify({ email: "unknown@test.io", password: "wrong" });
+const invalidLoginPayload = JSON.stringify({
+  email: "unknown@test.io",
+  password: "wrong",
+});
 const loginHeaders = { "Content-Type": "application/json" };
 
 async function postLogin() {
@@ -22,15 +25,27 @@ describe("authRateLimiter", () => {
   it("should include RateLimit headers on rate-limited routes", async () => {
     const response = await postLogin();
 
-    assert.ok(response.headers.get("ratelimit-limit"), "RateLimit-Limit doit être présent");
-    assert.ok(response.headers.get("ratelimit-remaining"), "RateLimit-Remaining doit être présent");
-    assert.ok(response.headers.get("ratelimit-reset"), "RateLimit-Reset doit être présent");
+    assert.ok(
+      response.headers.get("ratelimit-limit"),
+      "RateLimit-Limit doit être présent",
+    );
+    assert.ok(
+      response.headers.get("ratelimit-remaining"),
+      "RateLimit-Remaining doit être présent",
+    );
+    assert.ok(
+      response.headers.get("ratelimit-reset"),
+      "RateLimit-Reset doit être présent",
+    );
   });
 
   it("should report the correct limit in the RateLimit-Limit header", async () => {
     const response = await postLogin();
 
-    assert.strictEqual(response.headers.get("ratelimit-limit"), String(RATE_LIMIT));
+    assert.strictEqual(
+      response.headers.get("ratelimit-limit"),
+      String(RATE_LIMIT),
+    );
   });
 
   it("should decrement RateLimit-Remaining on each request", async () => {
@@ -40,7 +55,10 @@ describe("authRateLimiter", () => {
     const remaining1 = parseInt(r1.headers.get("ratelimit-remaining") ?? "-1");
     const remaining2 = parseInt(r2.headers.get("ratelimit-remaining") ?? "-1");
 
-    assert.ok(remaining2 < remaining1, "RateLimit-Remaining doit décroître à chaque requête");
+    assert.ok(
+      remaining2 < remaining1,
+      "RateLimit-Remaining doit décroître à chaque requête",
+    );
   });
 
   it("should return 429 after exceeding the limit", async () => {
@@ -58,7 +76,7 @@ describe("authRateLimiter", () => {
       await postLogin();
     }
     const response = await postLogin();
-    const body = await response.json() as { error: string };
+    const body = (await response.json()) as { error: string };
 
     assert.strictEqual(response.status, 429);
     assert.match(body.error, /Trop de tentatives/);
@@ -82,9 +100,18 @@ describe("authRateLimiter", () => {
     const registerResponse = await fetch(`${BASE_URL}/auth/register`, {
       method: "POST",
       headers: loginHeaders,
-      body: JSON.stringify({ firstname: "A", lastname: "B", email: "a@b.io", password: "Password1!" }),
+      body: JSON.stringify({
+        firstname: "A",
+        lastname: "B",
+        email: "a@b.io",
+        password: "Password1!",
+      }),
     });
 
-    assert.notStrictEqual(registerResponse.status, 429, "Le register ne doit pas être affecté par le quota login");
+    assert.notStrictEqual(
+      registerResponse.status,
+      429,
+      "Le register ne doit pas être affecté par le quota login",
+    );
   });
 });

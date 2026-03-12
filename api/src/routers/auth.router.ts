@@ -1,7 +1,11 @@
 import { Router } from "express";
 import * as authController from "../controllers/auth.controller.ts";
 import { checkRoles } from "../middlewares/access-control-middleware.ts";
-import { registerRateLimiter, loginRateLimiter, refreshRateLimiter } from "../middlewares/rate-limit.middleware.ts";
+import {
+  registerRateLimiter,
+  loginRateLimiter,
+  refreshRateLimiter,
+} from "../middlewares/rate-limit.middleware.ts";
 
 export const router = Router();
 
@@ -83,7 +87,11 @@ router.post("/auth/login", loginRateLimiter, authController.loginUser);
  *       204:
  *         description: Déconnecté
  */
-router.post("/auth/logout", checkRoles(["member", "author", "admin"]), authController.logoutUser);
+router.post(
+  "/auth/logout",
+  checkRoles(["member", "author", "admin"]),
+  authController.logoutUser,
+);
 
 /**
  * @openapi
@@ -112,7 +120,11 @@ router.post("/auth/logout", checkRoles(["member", "author", "admin"]), authContr
  *       401:
  *         description: Refresh token invalide ou expiré
  */
-router.post("/auth/refresh", refreshRateLimiter, authController.refreshAccessToken);
+router.post(
+  "/auth/refresh",
+  refreshRateLimiter,
+  authController.refreshAccessToken,
+);
 
 /**
  * @openapi
@@ -129,4 +141,8 @@ router.post("/auth/refresh", refreshRateLimiter, authController.refreshAccessTok
  *       401:
  *         description: Non authentifié
  */
-router.get("/auth/me", checkRoles(["member", "author", "admin"]), authController.getAuthenticatedUser);
+router.get(
+  "/auth/me",
+  checkRoles(["member", "author", "admin"]),
+  authController.getAuthenticatedUser,
+);

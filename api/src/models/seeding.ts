@@ -73,22 +73,40 @@ console.log(`🧩 ${levels.length} niveaux créés`);
 // ─── Tags ─────────────────────────────────────────────────────────────────────
 
 const parentTags = await Promise.all(
-  ["Programmation", "Web", "Base de données", "DevOps", "Mathématiques"].map((name) =>
-    prisma.tag.create({ data: { name } }),
+  ["Programmation", "Web", "Base de données", "DevOps", "Mathématiques"].map(
+    (name) => prisma.tag.create({ data: { name } }),
   ),
 );
 
 const childTags = await Promise.all([
-  prisma.tag.create({ data: { name: "JavaScript", parent_tag_id: parentTags[0].id } }),
-  prisma.tag.create({ data: { name: "TypeScript", parent_tag_id: parentTags[0].id } }),
-  prisma.tag.create({ data: { name: "Python", parent_tag_id: parentTags[0].id } }),
-  prisma.tag.create({ data: { name: "HTML/CSS", parent_tag_id: parentTags[1].id } }),
-  prisma.tag.create({ data: { name: "React", parent_tag_id: parentTags[1].id } }),
-  prisma.tag.create({ data: { name: "Node.js", parent_tag_id: parentTags[1].id } }),
-  prisma.tag.create({ data: { name: "PostgreSQL", parent_tag_id: parentTags[2].id } }),
+  prisma.tag.create({
+    data: { name: "JavaScript", parent_tag_id: parentTags[0].id },
+  }),
+  prisma.tag.create({
+    data: { name: "TypeScript", parent_tag_id: parentTags[0].id },
+  }),
+  prisma.tag.create({
+    data: { name: "Python", parent_tag_id: parentTags[0].id },
+  }),
+  prisma.tag.create({
+    data: { name: "HTML/CSS", parent_tag_id: parentTags[1].id },
+  }),
+  prisma.tag.create({
+    data: { name: "React", parent_tag_id: parentTags[1].id },
+  }),
+  prisma.tag.create({
+    data: { name: "Node.js", parent_tag_id: parentTags[1].id },
+  }),
+  prisma.tag.create({
+    data: { name: "PostgreSQL", parent_tag_id: parentTags[2].id },
+  }),
   prisma.tag.create({ data: { name: "SQL", parent_tag_id: parentTags[2].id } }),
-  prisma.tag.create({ data: { name: "Docker", parent_tag_id: parentTags[3].id } }),
-  prisma.tag.create({ data: { name: "Algèbre", parent_tag_id: parentTags[4].id } }),
+  prisma.tag.create({
+    data: { name: "Docker", parent_tag_id: parentTags[3].id },
+  }),
+  prisma.tag.create({
+    data: { name: "Algèbre", parent_tag_id: parentTags[4].id },
+  }),
 ]);
 
 const allTags = [...parentTags, ...childTags];
@@ -139,21 +157,81 @@ const questionsData: Array<{
   correct: string;
   wrong: string[];
 }> = [
-  { description: "Quel mot-clé déclare une constante en JS ?", correct: "const", wrong: ["let", "var", "def"] },
-  { description: "Que renvoie typeof null ?", correct: "object", wrong: ["null", "undefined", "string"] },
-  { description: "Quelle méthode ajoute un élément à la fin d'un tableau ?", correct: "push()", wrong: ["pop()", "shift()", "unshift()"] },
-  { description: "Quel opérateur vérifie l'égalité stricte ?", correct: "===", wrong: ["==", "=", "!="] },
-  { description: "Comment déclare-t-on une fonction fléchée ?", correct: "() => {}", wrong: ["function() {}", "def() {}", "func() {}"] },
-  { description: "Quelle commande initialise un projet Node.js ?", correct: "npm init", wrong: ["node init", "npm start", "node create"] },
-  { description: "Quelle clause filtre les lignes en SQL ?", correct: "WHERE", wrong: ["FILTER", "HAVING", "LIMIT"] },
-  { description: "Quelle commande lance un conteneur Docker ?", correct: "docker run", wrong: ["docker start", "docker exec", "docker up"] },
-  { description: "Quelle balise HTML crée un lien ?", correct: "<a>", wrong: ["<link>", "<href>", "<url>"] },
-  { description: "Quel hook React gère l'état local ?", correct: "useState", wrong: ["useEffect", "useRef", "useContext"] },
-  { description: "Quelle méthode JS retourne une promesse ?", correct: "fetch()", wrong: ["get()", "request()", "call()"] },
-  { description: "Comment typer un paramètre en TypeScript ?", correct: "param: string", wrong: ["param as string", "string param", "<string>param"] },
-  { description: "Quelle propriété CSS centre un flex item ?", correct: "align-items: center", wrong: ["text-align: center", "margin: auto", "justify-self: center"] },
-  { description: "Quel opérateur SQL joint deux tables ?", correct: "JOIN", wrong: ["MERGE", "COMBINE", "LINK"] },
-  { description: "Quelle méthode crée un tableau transformé en JS ?", correct: "map()", wrong: ["filter()", "reduce()", "forEach()"] },
+  {
+    description: "Quel mot-clé déclare une constante en JS ?",
+    correct: "const",
+    wrong: ["let", "var", "def"],
+  },
+  {
+    description: "Que renvoie typeof null ?",
+    correct: "object",
+    wrong: ["null", "undefined", "string"],
+  },
+  {
+    description: "Quelle méthode ajoute un élément à la fin d'un tableau ?",
+    correct: "push()",
+    wrong: ["pop()", "shift()", "unshift()"],
+  },
+  {
+    description: "Quel opérateur vérifie l'égalité stricte ?",
+    correct: "===",
+    wrong: ["==", "=", "!="],
+  },
+  {
+    description: "Comment déclare-t-on une fonction fléchée ?",
+    correct: "() => {}",
+    wrong: ["function() {}", "def() {}", "func() {}"],
+  },
+  {
+    description: "Quelle commande initialise un projet Node.js ?",
+    correct: "npm init",
+    wrong: ["node init", "npm start", "node create"],
+  },
+  {
+    description: "Quelle clause filtre les lignes en SQL ?",
+    correct: "WHERE",
+    wrong: ["FILTER", "HAVING", "LIMIT"],
+  },
+  {
+    description: "Quelle commande lance un conteneur Docker ?",
+    correct: "docker run",
+    wrong: ["docker start", "docker exec", "docker up"],
+  },
+  {
+    description: "Quelle balise HTML crée un lien ?",
+    correct: "<a>",
+    wrong: ["<link>", "<href>", "<url>"],
+  },
+  {
+    description: "Quel hook React gère l'état local ?",
+    correct: "useState",
+    wrong: ["useEffect", "useRef", "useContext"],
+  },
+  {
+    description: "Quelle méthode JS retourne une promesse ?",
+    correct: "fetch()",
+    wrong: ["get()", "request()", "call()"],
+  },
+  {
+    description: "Comment typer un paramètre en TypeScript ?",
+    correct: "param: string",
+    wrong: ["param as string", "string param", "<string>param"],
+  },
+  {
+    description: "Quelle propriété CSS centre un flex item ?",
+    correct: "align-items: center",
+    wrong: ["text-align: center", "margin: auto", "justify-self: center"],
+  },
+  {
+    description: "Quel opérateur SQL joint deux tables ?",
+    correct: "JOIN",
+    wrong: ["MERGE", "COMBINE", "LINK"],
+  },
+  {
+    description: "Quelle méthode crée un tableau transformé en JS ?",
+    correct: "map()",
+    wrong: ["filter()", "reduce()", "forEach()"],
+  },
 ];
 
 let totalQuestions = 0;
@@ -161,7 +239,9 @@ let totalChoices = 0;
 
 for (const quiz of quizzes) {
   const nbQuestions = faker.number.int({ min: 3, max: 5 });
-  const pool = [...questionsData].sort(() => Math.random() - 0.5).slice(0, nbQuestions);
+  const pool = [...questionsData]
+    .sort(() => Math.random() - 0.5)
+    .slice(0, nbQuestions);
 
   for (const qData of pool) {
     const question = await prisma.question.create({

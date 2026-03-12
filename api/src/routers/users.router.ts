@@ -51,7 +51,11 @@ router.get("/users", checkRoles(["admin"]), usersController.getAllUsers);
  *       404:
  *         description: Utilisateur introuvable
  */
-router.get("/users/:id/profile", checkRoles(["admin", "author", "member"]), usersController.getUserProfile);
+router.get(
+  "/users/:id/profile",
+  checkRoles(["admin", "author", "member"]),
+  usersController.getUserProfile,
+);
 
 /**
  * @openapi
@@ -77,4 +81,8 @@ router.get("/users/:id/profile", checkRoles(["admin", "author", "member"]), user
  *       404:
  *         description: Utilisateur introuvable
  */
-router.get("/users/:id/attempts", checkRoles(["admin", "author", "member"]), usersController.getUserAttempts);
+router.get(
+  "/users/:id/attempts",
+  checkRoles(["admin", "author", "member"]),
+  usersController.getUserAttempts,
+);

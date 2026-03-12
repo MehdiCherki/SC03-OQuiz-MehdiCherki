@@ -36,7 +36,11 @@ export const router = Router();
  *       404:
  *         description: Quiz introuvable
  */
-router.post("/quizzes/:id/questions", checkRoles(["admin", "author"]), questionsController.createQuestion);
+router.post(
+  "/quizzes/:id/questions",
+  checkRoles(["admin", "author"]),
+  questionsController.createQuestion,
+);
 
 /**
  * @openapi
@@ -68,7 +72,11 @@ router.post("/quizzes/:id/questions", checkRoles(["admin", "author"]), questions
  *       404:
  *         description: Question introuvable
  */
-router.patch("/questions/:id", checkRoles(["admin", "author"]), questionsController.updateQuestion);
+router.patch(
+  "/questions/:id",
+  checkRoles(["admin", "author"]),
+  questionsController.updateQuestion,
+);
 
 /**
  * @openapi
@@ -89,7 +97,11 @@ router.patch("/questions/:id", checkRoles(["admin", "author"]), questionsControl
  *       404:
  *         description: Question introuvable
  */
-router.delete("/questions/:id", checkRoles(["admin", "author"]), questionsController.deleteQuestion);
+router.delete(
+  "/questions/:id",
+  checkRoles(["admin", "author"]),
+  questionsController.deleteQuestion,
+);
 
 /**
  * @openapi
@@ -123,4 +135,8 @@ router.delete("/questions/:id", checkRoles(["admin", "author"]), questionsContro
  *       404:
  *         description: Question introuvable
  */
-router.post("/questions/:id/choices", checkRoles(["admin", "author"]), questionsController.createChoice);
+router.post(
+  "/questions/:id/choices",
+  checkRoles(["admin", "author"]),
+  questionsController.createChoice,
+);

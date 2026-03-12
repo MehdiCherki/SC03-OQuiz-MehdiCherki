@@ -12,9 +12,7 @@ const options: swaggerJsdoc.Options = {
       version: "1.0.0",
       description: "API REST pour l'application OQuiz",
     },
-    servers: [
-      { url: "/api", description: "Serveur courant" },
-    ],
+    servers: [{ url: "/api", description: "Serveur courant" }],
     components: {
       securitySchemes: {
         bearerAuth: {
@@ -80,7 +78,10 @@ const options: swaggerJsdoc.Options = {
             id: { type: "integer" },
             name: { type: "string" },
             parent_tag_id: { type: "integer", nullable: true },
-            children_tags: { type: "array", items: { $ref: "#/components/schemas/Tag" } },
+            children_tags: {
+              type: "array",
+              items: { $ref: "#/components/schemas/Tag" },
+            },
           },
         },
         Attempt: {

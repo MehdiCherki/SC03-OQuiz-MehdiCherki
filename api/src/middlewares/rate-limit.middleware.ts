@@ -1,7 +1,9 @@
 import { rateLimit } from "express-rate-limit";
 import type { RequestHandler } from "express";
 
-const LIMIT = process.env.RATE_LIMIT_MAX ? parseInt(process.env.RATE_LIMIT_MAX) : 10;
+const LIMIT = process.env.RATE_LIMIT_MAX
+  ? parseInt(process.env.RATE_LIMIT_MAX)
+  : 10;
 
 function createLimiter() {
   return rateLimit({
@@ -20,9 +22,12 @@ const limiters = {
 };
 
 // Proxies stables attachés au routeur — délèguent à l'instance courante (remplaçable via resetRateLimiters)
-export const registerRateLimiter: RequestHandler = (req, res, next) => limiters.register(req, res, next);
-export const loginRateLimiter: RequestHandler = (req, res, next) => limiters.login(req, res, next);
-export const refreshRateLimiter: RequestHandler = (req, res, next) => limiters.refresh(req, res, next);
+export const registerRateLimiter: RequestHandler = (req, res, next) =>
+  limiters.register(req, res, next);
+export const loginRateLimiter: RequestHandler = (req, res, next) =>
+  limiters.login(req, res, next);
+export const refreshRateLimiter: RequestHandler = (req, res, next) =>
+  limiters.refresh(req, res, next);
 
 // Réinitialise les compteurs — à appeler dans le beforeEach des tests
 export function resetRateLimiters() {

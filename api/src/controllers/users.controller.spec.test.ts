@@ -155,11 +155,17 @@ describe("[GET] /api/users/:id/profile", () => {
         role: "author",
       },
     });
-    const quiz = await prisma.quiz.create({ data: { title: "Quiz test", author_id: author.id } });
-    await prisma.attempt.create({ data: { score: 3, max_score: 5, user_id: user.id, quiz_id: quiz.id } });
+    const quiz = await prisma.quiz.create({
+      data: { title: "Quiz test", author_id: author.id },
+    });
+    await prisma.attempt.create({
+      data: { score: 3, max_score: 5, user_id: user.id, quiz_id: quiz.id },
+    });
 
     // Act
-    const { data: profile, status } = await authedRequester.get(`/users/${user.id}/profile`);
+    const { data: profile, status } = await authedRequester.get(
+      `/users/${user.id}/profile`,
+    );
 
     // Assert
     assert.strictEqual(status, 200);
@@ -184,7 +190,9 @@ describe("[GET] /api/users/:id/profile", () => {
         role: "member",
       },
     });
-    const response = await fetch(`http://localhost:7357/api/users/${user.id}/profile`);
+    const response = await fetch(
+      `http://localhost:7357/api/users/${user.id}/profile`,
+    );
     assert.strictEqual(response.status, 401);
   });
 });
@@ -210,11 +218,17 @@ describe("[GET] /api/users/:id/attempts", () => {
         role: "author",
       },
     });
-    const quiz = await prisma.quiz.create({ data: { title: "Quiz attempts", author_id: author.id } });
-    await prisma.attempt.create({ data: { score: 2, max_score: 4, user_id: user.id, quiz_id: quiz.id } });
+    const quiz = await prisma.quiz.create({
+      data: { title: "Quiz attempts", author_id: author.id },
+    });
+    await prisma.attempt.create({
+      data: { score: 2, max_score: 4, user_id: user.id, quiz_id: quiz.id },
+    });
 
     // Act — admin accède aux tentatives de n'importe qui
-    const { data: attempts, status } = await authedRequester.get(`/users/${user.id}/attempts`);
+    const { data: attempts, status } = await authedRequester.get(
+      `/users/${user.id}/attempts`,
+    );
 
     // Assert
     assert.strictEqual(status, 200);
@@ -244,11 +258,17 @@ describe("[GET] /api/users/:id/attempts", () => {
         role: "author",
       },
     });
-    const quiz = await prisma.quiz.create({ data: { title: "Quiz self", author_id: author.id } });
-    await prisma.attempt.create({ data: { score: 1, max_score: 3, user_id: user.id, quiz_id: quiz.id } });
+    const quiz = await prisma.quiz.create({
+      data: { title: "Quiz self", author_id: author.id },
+    });
+    await prisma.attempt.create({
+      data: { score: 1, max_score: 3, user_id: user.id, quiz_id: quiz.id },
+    });
 
     // Act
-    const { data: attempts, status } = await userRequester.get(`/users/${user.id}/attempts`);
+    const { data: attempts, status } = await userRequester.get(
+      `/users/${user.id}/attempts`,
+    );
 
     // Assert
     assert.strictEqual(status, 200);
@@ -278,7 +298,9 @@ describe("[GET] /api/users/:id/attempts", () => {
     const memberRequester = buildAuthedRequester(member);
 
     // Act
-    const { status } = await memberRequester.get(`/users/${otherUser.id}/attempts`);
+    const { status } = await memberRequester.get(
+      `/users/${otherUser.id}/attempts`,
+    );
 
     // Assert
     assert.strictEqual(status, 403);

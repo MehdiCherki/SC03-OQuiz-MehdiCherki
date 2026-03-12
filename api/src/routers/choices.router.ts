@@ -34,7 +34,11 @@ export const router = Router();
  *       404:
  *         description: Choix introuvable
  */
-router.patch("/choices/:id", checkRoles(["admin", "author"]), choicesController.updateChoice);
+router.patch(
+  "/choices/:id",
+  checkRoles(["admin", "author"]),
+  choicesController.updateChoice,
+);
 
 /**
  * @openapi
@@ -55,4 +59,8 @@ router.patch("/choices/:id", checkRoles(["admin", "author"]), choicesController.
  *       404:
  *         description: Choix introuvable
  */
-router.delete("/choices/:id", checkRoles(["admin", "author"]), choicesController.deleteChoice);
+router.delete(
+  "/choices/:id",
+  checkRoles(["admin", "author"]),
+  choicesController.deleteChoice,
+);

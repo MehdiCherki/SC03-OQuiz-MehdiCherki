@@ -38,7 +38,11 @@ export const router = Router();
  */
 router.get("/quizzes/recent", quizzesController.getRecentQuizzes);
 
-router.get("/quizzes", checkRoles(["admin", "author", "member"]), quizzesController.getAllQuizzes);
+router.get(
+  "/quizzes",
+  checkRoles(["admin", "author", "member"]),
+  quizzesController.getAllQuizzes,
+);
 
 /**
  * @openapi
@@ -63,7 +67,11 @@ router.get("/quizzes", checkRoles(["admin", "author", "member"]), quizzesControl
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
  */
-router.get("/quizzes/:id", checkRoles(["admin", "author", "member"]), quizzesController.getOneQuiz);
+router.get(
+  "/quizzes/:id",
+  checkRoles(["admin", "author", "member"]),
+  quizzesController.getOneQuiz,
+);
 
 /**
  * @openapi
@@ -87,7 +95,11 @@ router.get("/quizzes/:id", checkRoles(["admin", "author", "member"]), quizzesCon
  *       404:
  *         description: Quiz introuvable
  */
-router.get("/quizzes/:id/questions", checkRoles(["admin", "author", "member"]), quizzesController.getQuizQuestions);
+router.get(
+  "/quizzes/:id/questions",
+  checkRoles(["admin", "author", "member"]),
+  quizzesController.getQuizQuestions,
+);
 
 /**
  * @openapi
@@ -113,7 +125,11 @@ router.get("/quizzes/:id/questions", checkRoles(["admin", "author", "member"]), 
  *       404:
  *         description: Quiz introuvable
  */
-router.get("/quizzes/:id/attempts", checkRoles(["admin", "author"]), attemptsController.getQuizAttempts);
+router.get(
+  "/quizzes/:id/attempts",
+  checkRoles(["admin", "author"]),
+  attemptsController.getQuizAttempts,
+);
 
 /**
  * @openapi
@@ -138,7 +154,11 @@ router.get("/quizzes/:id/attempts", checkRoles(["admin", "author"]), attemptsCon
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Quiz' }
  */
-router.post("/quizzes", checkRoles(["admin", "author"]), quizzesController.createQuiz);
+router.post(
+  "/quizzes",
+  checkRoles(["admin", "author"]),
+  quizzesController.createQuiz,
+);
 
 /**
  * @openapi
@@ -182,7 +202,11 @@ router.post("/quizzes", checkRoles(["admin", "author"]), quizzesController.creat
  *                       good_choice_id: { type: integer }
  *                       is_correct:     { type: boolean }
  */
-router.post("/quizzes/:id/attempts", checkRoles(["admin", "author", "member"]), attemptsController.createAttempt);
+router.post(
+  "/quizzes/:id/attempts",
+  checkRoles(["admin", "author", "member"]),
+  attemptsController.createAttempt,
+);
 
 /**
  * @openapi
@@ -214,7 +238,11 @@ router.post("/quizzes/:id/attempts", checkRoles(["admin", "author", "member"]), 
  *       404:
  *         description: Quiz introuvable
  */
-router.patch("/quizzes/:id", checkRoles(["admin", "author"]), quizzesController.updateQuiz);
+router.patch(
+  "/quizzes/:id",
+  checkRoles(["admin", "author"]),
+  quizzesController.updateQuiz,
+);
 
 /**
  * @openapi
@@ -239,7 +267,11 @@ router.patch("/quizzes/:id", checkRoles(["admin", "author"]), quizzesController.
  *       404:
  *         description: Quiz ou tag introuvable
  */
-router.put("/quizzes/:id/tags/:tagId", checkRoles(["admin", "author"]), quizzesController.addTagToQuiz);
+router.put(
+  "/quizzes/:id/tags/:tagId",
+  checkRoles(["admin", "author"]),
+  quizzesController.addTagToQuiz,
+);
 
 /**
  * @openapi
@@ -264,7 +296,11 @@ router.put("/quizzes/:id/tags/:tagId", checkRoles(["admin", "author"]), quizzesC
  *       404:
  *         description: Quiz ou association introuvable
  */
-router.delete("/quizzes/:id/tags/:tagId", checkRoles(["admin", "author"]), quizzesController.removeTagFromQuiz);
+router.delete(
+  "/quizzes/:id/tags/:tagId",
+  checkRoles(["admin", "author"]),
+  quizzesController.removeTagFromQuiz,
+);
 
 /**
  * @openapi
@@ -285,4 +321,8 @@ router.delete("/quizzes/:id/tags/:tagId", checkRoles(["admin", "author"]), quizz
  *       404:
  *         description: Quiz introuvable
  */
-router.delete("/quizzes/:id", checkRoles(["admin", "author"]), quizzesController.deleteQuiz);
+router.delete(
+  "/quizzes/:id",
+  checkRoles(["admin", "author"]),
+  quizzesController.deleteQuiz,
+);

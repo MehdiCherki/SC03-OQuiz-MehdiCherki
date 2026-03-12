@@ -64,7 +64,9 @@ describe("quizzes", () => {
     it("should return the 6 most recent quizzes without authentication", async () => {
       // Arrange
       for (let i = 1; i <= 8; i++) {
-        await prisma.quiz.create({ data: { title: `Quiz ${i}`, author_id: author.id } });
+        await prisma.quiz.create({
+          data: { title: `Quiz ${i}`, author_id: author.id },
+        });
       }
 
       // Act — requête sans token
@@ -78,7 +80,9 @@ describe("quizzes", () => {
 
     it("should return less than 6 quizzes when fewer exist", async () => {
       // Arrange
-      await prisma.quiz.create({ data: { title: "Quiz unique", author_id: author.id } });
+      await prisma.quiz.create({
+        data: { title: "Quiz unique", author_id: author.id },
+      });
 
       // Act
       const { data: quizzes } = await authedRequester.get("/quizzes/recent");
@@ -92,10 +96,14 @@ describe("quizzes", () => {
     it("should return the quiz from the database", async () => {
       // Arrange
       const QUIZ = { title: "Quiz Node.js", description: "Un quiz sur Node" };
-      const databaseQuiz = await prisma.quiz.create({ data: { ...QUIZ, author_id: author.id } });
+      const databaseQuiz = await prisma.quiz.create({
+        data: { ...QUIZ, author_id: author.id },
+      });
 
       // Act
-      const { data: quiz } = await authedRequester.get(`/quizzes/${databaseQuiz.id}`);
+      const { data: quiz } = await authedRequester.get(
+        `/quizzes/${databaseQuiz.id}`,
+      );
 
       // Assert
       assert.partialDeepStrictEqual(quiz, QUIZ);
@@ -107,7 +115,10 @@ describe("quizzes", () => {
         data: { title: "Quiz complet", author_id: author.id },
       });
       const question = await prisma.question.create({
-        data: { description: "Quelle est la capitale de la France ?", quiz_id: quiz.id },
+        data: {
+          description: "Quelle est la capitale de la France ?",
+          quiz_id: quiz.id,
+        },
       });
       await prisma.choice.createMany({
         data: [
@@ -117,14 +128,27 @@ describe("quizzes", () => {
       });
 
       // Act
-      const { data: returnedQuiz } = await authedRequester.get(`/quizzes/${quiz.id}`);
+      const { data: returnedQuiz } = await authedRequester.get(
+        `/quizzes/${quiz.id}`,
+      );
 
       // Assert
       assert.strictEqual(returnedQuiz.questions.length, 1);
-      assert.strictEqual(returnedQuiz.questions[0].description, "Quelle est la capitale de la France ?");
+      assert.strictEqual(
+        returnedQuiz.questions[0].description,
+        "Quelle est la capitale de la France ?",
+      );
       assert.strictEqual(returnedQuiz.questions[0].choices.length, 2);
-      assert.ok(returnedQuiz.questions[0].choices.some((c: { description: string }) => c.description === "Paris"));
-      assert.ok(returnedQuiz.questions[0].choices.some((c: { description: string }) => c.description === "Lyon"));
+      assert.ok(
+        returnedQuiz.questions[0].choices.some(
+          (c: { description: string }) => c.description === "Paris",
+        ),
+      );
+      assert.ok(
+        returnedQuiz.questions[0].choices.some(
+          (c: { description: string }) => c.description === "Lyon",
+        ),
+      );
     });
 
     it("should return a 404 when the requested quiz does not exist", async () => {
@@ -132,7 +156,9 @@ describe("quizzes", () => {
       const UNEXISTING_QUIZ_ID = 42;
 
       // Act
-      const { status } = await authedRequester.get(`/quizzes/${UNEXISTING_QUIZ_ID}`);
+      const { status } = await authedRequester.get(
+        `/quizzes/${UNEXISTING_QUIZ_ID}`,
+      );
 
       // Assert
       assert.equal(status, 404);
@@ -146,7 +172,10 @@ describe("quizzes", () => {
         data: { title: "Quiz avec questions", author_id: author.id },
       });
       const question = await prisma.question.create({
-        data: { description: "Quelle est la capitale de l'Italie ?", quiz_id: quiz.id },
+        data: {
+          description: "Quelle est la capitale de l'Italie ?",
+          quiz_id: quiz.id,
+        },
       });
       await prisma.choice.createMany({
         data: [
@@ -156,11 +185,16 @@ describe("quizzes", () => {
       });
 
       // Act
-      const { data: questions } = await authedRequester.get(`/quizzes/${quiz.id}/questions`);
+      const { data: questions } = await authedRequester.get(
+        `/quizzes/${quiz.id}/questions`,
+      );
 
       // Assert
       assert.strictEqual(questions.length, 1);
-      assert.strictEqual(questions[0].description, "Quelle est la capitale de l'Italie ?");
+      assert.strictEqual(
+        questions[0].description,
+        "Quelle est la capitale de l'Italie ?",
+      );
       assert.strictEqual(questions[0].choices.length, 2);
     });
 
@@ -170,8 +204,12 @@ describe("quizzes", () => {
     });
 
     it("should return 401 when accessed without authentication", async () => {
-      const quiz = await prisma.quiz.create({ data: { title: "Quiz", author_id: author.id } });
-      const response = await fetch(`http://localhost:7357/api/quizzes/${quiz.id}/questions`);
+      const quiz = await prisma.quiz.create({
+        data: { title: "Quiz", author_id: author.id },
+      });
+      const response = await fetch(
+        `http://localhost:7357/api/quizzes/${quiz.id}/questions`,
+      );
       assert.strictEqual(response.status, 401);
     });
   });
@@ -185,17 +223,25 @@ describe("quizzes", () => {
       await authorRequester.post("/quizzes", body);
 
       // Assert
-      const createdQuiz = await prisma.quiz.findFirst({ where: { title: "Mon nouveau quiz" } });
+      const createdQuiz = await prisma.quiz.findFirst({
+        where: { title: "Mon nouveau quiz" },
+      });
       assert.ok(createdQuiz);
       assert.strictEqual(createdQuiz.author_id, author.id);
     });
 
     it("should return the created quiz with the right properties", async () => {
       // Arrange
-      const body = { title: "Quiz avec description", description: "Une description" };
+      const body = {
+        title: "Quiz avec description",
+        description: "Une description",
+      };
 
       // Act
-      const { data: createdQuiz, status } = await authorRequester.post("/quizzes", body);
+      const { data: createdQuiz, status } = await authorRequester.post(
+        "/quizzes",
+        body,
+      );
 
       // Assert
       assert.strictEqual(status, 201);
@@ -209,7 +255,9 @@ describe("quizzes", () => {
 
     it("should set author_id from the authenticated user", async () => {
       // Act
-      const { data: createdQuiz } = await authorRequester.post("/quizzes", { title: "Quiz auteur" });
+      const { data: createdQuiz } = await authorRequester.post("/quizzes", {
+        title: "Quiz auteur",
+      });
 
       // Assert
       assert.strictEqual(createdQuiz.author_id, author.id);
@@ -229,7 +277,9 @@ describe("quizzes", () => {
       const memberRequester = buildAuthedRequester(member);
 
       // Act
-      const { status } = await memberRequester.post("/quizzes", { title: "Interdit" });
+      const { status } = await memberRequester.post("/quizzes", {
+        title: "Interdit",
+      });
 
       // Assert
       assert.strictEqual(status, 403);
@@ -245,7 +295,9 @@ describe("quizzes", () => {
       const NEW_TITLE = "Nouveau titre";
 
       // Act
-      const httpResponse = await authorRequester.patch(`/quizzes/${quiz.id}`, { title: NEW_TITLE });
+      const httpResponse = await authorRequester.patch(`/quizzes/${quiz.id}`, {
+        title: NEW_TITLE,
+      });
 
       // Assert
       assert.strictEqual(httpResponse.status, 200);
@@ -255,7 +307,11 @@ describe("quizzes", () => {
     it("should update the quiz description", async () => {
       // Arrange
       const quiz = await prisma.quiz.create({
-        data: { title: "Quiz", description: "Ancienne description", author_id: author.id },
+        data: {
+          title: "Quiz",
+          description: "Ancienne description",
+          author_id: author.id,
+        },
       });
 
       // Act
@@ -273,7 +329,10 @@ describe("quizzes", () => {
       const UNEXISTING_QUIZ_ID = 42;
 
       // Act
-      const { status } = await authorRequester.patch(`/quizzes/${UNEXISTING_QUIZ_ID}`, { title: "Nouveau" });
+      const { status } = await authorRequester.patch(
+        `/quizzes/${UNEXISTING_QUIZ_ID}`,
+        { title: "Nouveau" },
+      );
 
       // Assert
       assert.strictEqual(status, 404);
@@ -295,7 +354,9 @@ describe("quizzes", () => {
       });
 
       // Act — Alice essaie de modifier le quiz de Bob
-      const { status } = await authorRequester.patch(`/quizzes/${quiz.id}`, { title: "Piraté" });
+      const { status } = await authorRequester.patch(`/quizzes/${quiz.id}`, {
+        title: "Piraté",
+      });
 
       // Assert
       assert.strictEqual(status, 403);
@@ -308,7 +369,10 @@ describe("quizzes", () => {
       });
 
       // Act — admin modifie le quiz d'Alice
-      const { status, data } = await authedRequester.patch(`/quizzes/${quiz.id}`, { title: "Modifié par admin" });
+      const { status, data } = await authedRequester.patch(
+        `/quizzes/${quiz.id}`,
+        { title: "Modifié par admin" },
+      );
 
       // Assert
       assert.strictEqual(status, 200);
@@ -341,7 +405,11 @@ describe("quizzes", () => {
         data: { description: "Une question", quiz_id: quiz.id },
       });
       await prisma.choice.create({
-        data: { description: "Une réponse", is_valid: true, question_id: question.id },
+        data: {
+          description: "Une réponse",
+          is_valid: true,
+          question_id: question.id,
+        },
       });
 
       // Act
@@ -357,7 +425,9 @@ describe("quizzes", () => {
       const UNEXISTING_QUIZ_ID = 42;
 
       // Act
-      const { status } = await authorRequester.delete(`/quizzes/${UNEXISTING_QUIZ_ID}`);
+      const { status } = await authorRequester.delete(
+        `/quizzes/${UNEXISTING_QUIZ_ID}`,
+      );
 
       // Assert
       assert.equal(status, 404);

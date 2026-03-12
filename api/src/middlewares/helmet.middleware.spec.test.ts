@@ -12,7 +12,10 @@ describe("helmetMiddleware", () => {
 
   it("should set X-Content-Type-Options: nosniff", async () => {
     const response = await fetch(`${BASE_URL}/quizzes/recent`);
-    assert.strictEqual(response.headers.get("x-content-type-options"), "nosniff");
+    assert.strictEqual(
+      response.headers.get("x-content-type-options"),
+      "nosniff",
+    );
   });
 
   it("should set X-Frame-Options to deny clickjacking", async () => {

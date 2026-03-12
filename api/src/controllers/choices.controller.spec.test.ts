@@ -37,7 +37,11 @@ describe("choices", () => {
     it("should update the choice description", async () => {
       // Arrange
       const choice = await prisma.choice.create({
-        data: { description: "Ancien libellé", is_valid: false, question_id: questionId },
+        data: {
+          description: "Ancien libellé",
+          is_valid: false,
+          question_id: questionId,
+        },
       });
 
       // Act
@@ -55,13 +59,20 @@ describe("choices", () => {
     it("should update is_valid", async () => {
       // Arrange
       const choice = await prisma.choice.create({
-        data: { description: "Paris", is_valid: false, question_id: questionId },
+        data: {
+          description: "Paris",
+          is_valid: false,
+          question_id: questionId,
+        },
       });
 
       // Act
-      const { data: updated } = await authorRequester.patch(`/choices/${choice.id}`, {
-        is_valid: true,
-      });
+      const { data: updated } = await authorRequester.patch(
+        `/choices/${choice.id}`,
+        {
+          is_valid: true,
+        },
+      );
 
       // Assert
       assert.strictEqual(updated.is_valid, true);
@@ -86,7 +97,11 @@ describe("choices", () => {
         },
       });
       const choice = await prisma.choice.create({
-        data: { description: "Choix d'Alice", is_valid: true, question_id: questionId },
+        data: {
+          description: "Choix d'Alice",
+          is_valid: true,
+          question_id: questionId,
+        },
       });
       const otherRequester = buildAuthedRequester(otherAuthor);
 
@@ -102,7 +117,11 @@ describe("choices", () => {
     it("should allow an admin to update any choice", async () => {
       // Arrange
       const choice = await prisma.choice.create({
-        data: { description: "Choix d'Alice", is_valid: false, question_id: questionId },
+        data: {
+          description: "Choix d'Alice",
+          is_valid: false,
+          question_id: questionId,
+        },
       });
 
       // Act
@@ -121,7 +140,11 @@ describe("choices", () => {
     it("should delete the choice from the database", async () => {
       // Arrange
       const choice = await prisma.choice.create({
-        data: { description: "À supprimer", is_valid: false, question_id: questionId },
+        data: {
+          description: "À supprimer",
+          is_valid: false,
+          question_id: questionId,
+        },
       });
 
       // Act
@@ -149,7 +172,11 @@ describe("choices", () => {
         },
       });
       const choice = await prisma.choice.create({
-        data: { description: "Choix d'Alice", is_valid: true, question_id: questionId },
+        data: {
+          description: "Choix d'Alice",
+          is_valid: true,
+          question_id: questionId,
+        },
       });
       const otherRequester = buildAuthedRequester(otherAuthor);
 
@@ -163,7 +190,11 @@ describe("choices", () => {
     it("should allow an admin to delete any choice", async () => {
       // Arrange
       const choice = await prisma.choice.create({
-        data: { description: "Choix d'Alice", is_valid: true, question_id: questionId },
+        data: {
+          description: "Choix d'Alice",
+          is_valid: true,
+          question_id: questionId,
+        },
       });
 
       // Act
