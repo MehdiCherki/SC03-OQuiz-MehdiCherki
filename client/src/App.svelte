@@ -13,15 +13,15 @@
     <p>Une erreur est survenue. Merci de bien vouloir réessayer plus tard.</p>
   {/if}
   
-  {#if !isLoading && !hasError && users.length === 0}
-    <p>Aucun utilisateur trouvé.</p>
+  {#if !isLoading && !hasError && quizzes.length === 0}
+    <p>Aucun quiz trouvé.</p>
   {/if}
 
-  {#if users.length > 0}
-    <h2>Liste des utilisateurs</h2>
+  {#if quizzes.length > 0}
+    <h2>Liste des quiz</h2>
     <ul>
-      {#each users as user}
-        <li>{user.firstname}</li>
+      {#each quizzes as quiz}
+        <li>{quiz.title}</li>
       {/each}
     </ul>
   {/if}
@@ -34,21 +34,21 @@
 
 <script lang="ts">
   import { toReadableDate } from "./lib/utils";
-  import { api, type UserDTO } from "./services/api";
+  import { api, type QuizDTO } from "./services/api";
 
-  let users = $state<UserDTO[]>([]);
+  let quizzes = $state<QuizDTO[]>([]);
   let hasError = $state(false);
   let isLoading = $state(false);
 
   $effect(() => {
-    fetchUsers();
+    fetchRecentQuizzes();
   });
 
-  async function fetchUsers() {
+  async function fetchRecentQuizzes() {
     isLoading = true;
     
     try {
-      users = await api.getUsers();
+      quizzes = await api.getRecentQuizzes();
     } catch (error) {
       console.error(error);
       hasError = true;
