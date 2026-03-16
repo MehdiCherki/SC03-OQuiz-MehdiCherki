@@ -11,4 +11,5 @@ export const config = {
   allowedOrigins: process.env.ALLOWED_ORIGINS,
   isProd: process.env.NODE_ENV === "production" || false,
   jwtSecret: process.env.JWT_SECRET,
+  logLevel: process.env.LOG_LEVEL || "info",
 };

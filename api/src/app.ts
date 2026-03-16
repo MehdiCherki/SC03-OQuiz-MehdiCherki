@@ -10,6 +10,7 @@ import { infoMiddleware } from "./middlewares/info.middleware.ts";
 import { xssSanitizer } from "./middlewares/xss-sanitizer.middleware.ts";
 import { helmetMiddleware } from "./middlewares/helmet.middleware.ts";
 import { swaggerSpec } from "./lib/swagger.ts";
+import { logRequest } from "./middlewares/log-request.middleware.ts";
 
 // Créer une app Express
 export const app = express();
@@ -18,6 +19,8 @@ export const app = express();
 if (config.isProd) {
   app.set("trust proxy", 1);
 }
+
+app.use(logRequest);
 
 // Sécuriser les headers HTTP
 app.use(helmetMiddleware);

@@ -1,2 +1,6 @@
 .env.docker
 .DS_Store
+api/combined.log
+api/exceptions.log
+api/error.log
+api/rejections.log

@@ -1,3 +1,4 @@
+import { logger } from "../lib/log.ts";
 import { Role } from "../models/index.ts";
 import { Request } from "express";
 
@@ -8,6 +9,8 @@ declare global {
   namespace Express {
     interface Request {
       user?: { id: number; role: Role };
+      requestId?: string;
+      log: typeof logger;
     }
   }
 }
@@ -17,4 +20,6 @@ declare global {
 // Inconvénient (mineur) : on doit importer `AuthenticatedRequest` dans les controlleurs plutot que Request
 export interface AuthenticatedRequest extends Request {
   user?: { id: number; role: Role };
+  requestId?: string;
+  log: typeof logger;
 }
