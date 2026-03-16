@@ -1,2 +1,4 @@
 .env.docker
 .DS_Store
+logs-service/node_modules/
+logs-service/.env
