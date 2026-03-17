@@ -7,7 +7,6 @@ import { NotFoundError } from "../lib/errors.ts";
 export async function createLog(req: Request, res: Response): Promise<void> {
   const logData = CreateLogSchema.parse(req.body);
   await logService.createLog(logData);
-  console.log(logData);
   res.status(201).json({ message: "Log créé avec succès" });
 }
 

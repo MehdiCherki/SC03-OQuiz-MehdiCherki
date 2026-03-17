@@ -29,8 +29,6 @@ describe("[POST] /auth/register", () => {
       where: { email: USER.email },
     });
 
-    console.log("dbUser", dbUser);
-
     assert.ok(dbUser.id);
     assert.strictEqual(dbUser.firstname, USER.firstname);
     assert.strictEqual(dbUser.lastname, USER.lastname);
