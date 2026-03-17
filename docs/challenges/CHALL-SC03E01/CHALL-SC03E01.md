@@ -9,6 +9,7 @@
 
 Les exercices suivants sont indépendants. Ils peuvent être codé dans n'importe quel ordre.
 
+
 ## Exercice n°1 : `GET /auth/me`
 
 Implémenter la route `GET /auth/me` afin de récupérer les données d'utilisateur qui s'authentifie en fournissant un `access token` valide via les headers de sa requête. Tester cette route manuellement, puis implémenter au moins un test automatisé pour cette route.
@@ -22,7 +23,7 @@ Pseudo-code détaillé
   - si le token n'est pas fourni, renvoyer une 401
   - (bonus : ou le récupérer depuis les cookies)
 
-- Valider et décoder l'`access token` (JWT) à l'aide de la librairie `jsonwebtoken`.
+- Valider et décoder l'`access token` (JWT) à l'aide de la librairie `jsonwebtoken`. 
   - si le token n'est pas valide ou expiré, renvoyer une 401
 
 - Récupérer l'ID de l'utilisateur depuis le payload du JWT décodé
@@ -33,6 +34,7 @@ Pseudo-code détaillé
 - Renvoyer les données de l'utilisateur au client (sauf le mot de passe bien sûr !)
 
 </details>
+
 
 ### Exercice n°2 : `POST /auth/refresh`
 
@@ -61,15 +63,14 @@ Pseudo-code détaillé
 
 - Renvoyer les tokens via le corps de la réponse
   - (bonus : et également via les cookies sécurisés)
-
+  
 </details>
 
 ## Exercice n°3 (bonus) : `POST /auth/logout`
 
 Implémenter la route `POST /auth/logout` afin d'écraser les cookies côté client.
 
-Explication :
-
+Explication : 
 - si le client stock l'`access token` et le `refresh token` dans le `localStorage`, alors pour se déconnecter, il lui suffit de les retirer du `localStorage` (~= perdre les tokens !)
 - si le client stock l'`access token` et le `refresh token` dans les `cookies`, alors c'est le serveur qui doit envoyer de nouveau cookies pour écraser les valeurs existantes, puisque ceux-ci sont `HTTPOnly` (donc non accessible côté client !)
 
@@ -82,3 +83,4 @@ Pseudo-code détaillé
 - Renvoyer une réponse `204 - No Content`
 
 </details>
+

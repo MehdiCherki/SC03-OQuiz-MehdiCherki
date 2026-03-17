@@ -1,0 +1,43 @@
+@startuml O'vitrine
+
+left to right direction
+
+actor Invité
+actor Administrateur
+
+Invité <|-- Administrateur
+
+
+rectangle "O'vitrine" {
+  
+  usecase "Consulter la page d'accueil" as UC1
+  usecase "Voir la liste des projets" as UC2
+  usecase "Voir les détails d’un projet" as UC3
+  usecase "Accéder aux réseaux sociaux" as UC4
+
+  usecase "Ajouter un projet" as UC5
+  usecase "Modifier un projet" as UC6
+  usecase "Supprimer un projet" as UC7
+  usecase "Associer des technologies à un projet" as UC8
+
+  rectangle "Demande de contact par email" as CE {
+    usecase "Soumettre le formulaire de contact" as CE1
+    usecase "Envoyer un email dans la boite de contact" as CE2
+  }
+}
+
+Invité --> UC1
+Invité --> UC2
+Invité --> UC3
+Invité --> UC4
+
+Administrateur --> UC5
+Administrateur --> UC6
+Administrateur --> UC7
+Administrateur --> UC8
+
+
+Invité --> CE1
+CE2 .> CE1 : << extends >>
+
+@enduml

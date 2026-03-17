@@ -1,0 +1,31 @@
+@startuml Contact par email
+actor Utilisateur
+participant "Système" as Systeme
+database "Base de données" as BDD
+participant "Service mail" as Mail
+
+== Consultation de la page ==
+Utilisateur -> Systeme : Accéder à la page de contact
+Systeme --> Utilisateur : Présentation de la page de contact
+
+== Soumission du formulaire ==
+Utilisateur -> Systeme : Soumettre formulaire (email, message, ...)
+Systeme -> Systeme : Vérifier validité des données
+
+alt Formulaire invalide
+    Systeme -> Utilisateur : Retourner erreurs de validation
+else Formulaire valide
+    Systeme -> BDD : Vérifier si email existe déjà
+    BDD --> Systeme : Résultat (existe / n'existe pas)
+
+    alt Email déjà existant
+        Systeme -> Utilisateur : Informer email déjà utilisé
+    else Nouvel email
+        Systeme -> BDD : Enregistrer le contact
+        BDD --> Systeme : Confirmation enregistrement
+        Systeme -> Mail : Envoyer mail de confirmation
+        Mail --> Systeme : Confirmation envoi
+        Systeme -> Utilisateur : Informer succès prise de contact
+    end
+end
+@enduml
