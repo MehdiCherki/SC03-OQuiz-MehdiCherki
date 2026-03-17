@@ -2,7 +2,7 @@
 # Sensible à l'indentation (comme en Python)
 
 services:                 # Liste des serveurs (nos conteneurs !)
-  database:                  # Nom de notre premier service (nom du conteneur dans le réseau !) 
+  database:                  # Nom de notre premier service (nom du conteneur dans le réseau !)
     image: postgres:17       # Image permettant de créer le conteneur
     restart: unless-stopped  # Redémarre automatiquement mon service en cas de crash (sauf si je l'ai éteint manuellement)
     networks:
@@ -15,6 +15,12 @@ services:                 # Liste des serveurs (nos conteneurs !)
       POSTGRES_DB: ${POSTGRES_DB}
     ports:                   # Si on a besoin de pouvoir contacter la BDD depuis l'extérieur, on peut rajouter ce binding de port, sinon pas besoin
       - ${POSTGRES_LOCAL_PORT}:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s   # Fréquence des vérifications
+      timeout: 5s     # Délai max pour qu'une vérification réponde
+      retries: 5      # Nombre d'échecs consécutifs avant de passer en "unhealthy"
+      start_period: 20s  # Délai de grâce au démarrage (pas de pénalité si le check échoue)
 
   api:
     build:                    # Plutôt que de partir d'une image existante, on demande à compose de générer l'image à partir de :
@@ -37,9 +43,17 @@ services:                 # Liste des serveurs (nos conteneurs !)
     networks:
       - oquiz-network
     depends_on:
-      - database       # On s'assure que le service "database" soit lancé avant de lancer ce service
-      - logs-service   # On s'assure que le service de logs soit lancé avant l'API
-        
+      database:
+        condition: service_healthy  # Attend que Postgres soit prêt avant de lancer les migrations
+      logs-service:
+        condition: service_healthy  # Attend que le service de logs soit prêt avant de démarrer
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/info || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s  # Délai plus long : migrations Prisma à exécuter au démarrage
+
   client:
     build:
       context: ./client
@@ -50,18 +64,26 @@ services:                 # Liste des serveurs (nos conteneurs !)
     ports:
       - ${CLIENT_LOCAL_PORT}:80
     depends_on:
-      - api
+      api:
+        condition: service_healthy  # Attend que l'API soit prête avant de démarrer le client
     networks:
       - oquiz-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   # Service complémentaire : pour visualiser et manipuler la BDD via une interface graphique
   adminer:
     image: adminer
     restart: unless-stopped
-    ports: 
+    ports:
       - ${ADMINER_LOCAL_PORT}:8080
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     networks:
       - oquiz-network
 
@@ -79,7 +101,14 @@ services:                 # Liste des serveurs (nos conteneurs !)
     networks:
       - oquiz-network
     depends_on:
-      - logs-db
+      logs-db:
+        condition: service_healthy  # Attend que MongoDB soit prêt avant de démarrer
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3500/api/logs || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # Base de données MongoDB pour le service de logs
   logs-db:
@@ -91,6 +120,12 @@ services:                 # Liste des serveurs (nos conteneurs !)
       - logs-volume:/data/db  # Persistance des logs MongoDB
     ports:
       - ${LOGS_DB_LOCAL_PORT}:27017
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval \"db.adminCommand('ping').ok\" | grep -q 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   # Reverse proxy nginx
   proxy:
@@ -106,8 +141,10 @@ services:                 # Liste des serveurs (nos conteneurs !)
       - CLIENT_SERVER_NAME=${CLIENT_SERVER_NAME}
       - API_SERVER_NAME=${API_SERVER_NAME}
     depends_on:
-      - api
-      - client
+      api:
+        condition: service_healthy
+      client:
+        condition: service_healthy
     networks:
       - oquiz-network
 
