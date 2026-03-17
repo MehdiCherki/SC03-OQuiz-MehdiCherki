@@ -4,7 +4,6 @@ import { HttpClientError } from "../lib/errors.ts";
 import { config } from "../../config.ts";
 import { logger } from "../lib/logger.ts";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function globalErrorHandler(
   error: Error,
   req: Request,
