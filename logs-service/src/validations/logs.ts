@@ -24,7 +24,7 @@ export const CreateLogSchema = z.looseObject({
     .max(100, "Le nom du service est trop long"),
   version: z.string().max(20).optional(),
   environment: z.string().max(50).optional(),
-  userId: z.string().max(100).optional(),
+  userId: z.number().optional(),
   requestId: z.string().max(100).optional(),
   sessionId: z.string().max(100).optional(),
   hostname: z.string().max(255).optional(),

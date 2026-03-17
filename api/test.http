@@ -11,7 +11,7 @@
 @baseUrl     = http://localhost:4000/api
 
 # Remplacer par le token obtenu après "Login"
-@token       = sbg
+@token       = PASTE_ACCESS_TOKEN_HERE
 # Remplacer par un token admin pour les routes admin-only
 @adminToken  = PASTE_ADMIN_TOKEN_HERE
 

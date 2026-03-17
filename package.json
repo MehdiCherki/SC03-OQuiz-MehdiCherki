@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "dev": "npm run dev --prefix api & npm run dev --prefix logs-service",
+    "install": "npm i --prefix api & npm i --prefix logs-service"
+  }
+}

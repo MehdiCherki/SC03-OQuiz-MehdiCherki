@@ -22,7 +22,7 @@ export function logRequest(req: Request, res: Response, next: NextFunction) {
       ip: req.ip,
       service: "oquiz",
       userAgent: req.get("user-agent"),
-      userId: `${req.user?.id}`,
+      userId: req.user?.id,
       requestId: req.requestId,
     });
   });
