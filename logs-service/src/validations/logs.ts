@@ -15,12 +15,12 @@ export const CreateLogSchema = z.looseObject({
   level: LogLevelSchema,
   message: z
     .string()
-    .min(3, "Le message est absent ou trop court")
+    .min(3, "Le message est trop court")
     .max(1000, "Le message est trop long")
     .optional(),
   service: z
     .string()
-    .min(3, "Le nom du service est absent ou trop court")
+    .min(3, "Le nom du service est trop court")
     .max(100, "Le nom du service est trop long"),
   version: z.string().max(20).optional(),
   environment: z.string().max(50).optional(),
