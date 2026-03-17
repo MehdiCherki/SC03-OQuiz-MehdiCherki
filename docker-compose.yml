@@ -29,12 +29,16 @@ services:                 # Liste des serveurs (nos conteneurs !)
       DATABASE_URL: ${DATABASE_URL}  # On lit directement dans le conteneur (database) puisqu'on est sur le meme network = le port 5432 j'ai accès depuis cet autre conteneur
       JWT_SECRET: ${JWT_SECRET}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      LOG_LEVEL: ${LOG_LEVEL}
+      LOGS_SERVICE_HOST: logs-service  # Nom du service dans le réseau Docker
+      LOGS_SERVICE_PORT: 3500
     ports:
       - ${API_LOCAL_PORT}:3000
     networks:
       - oquiz-network
     depends_on:
-      - database # On s'assure que le service "database" soit lancé avant de lancer ce service
+      - database       # On s'assure que le service "database" soit lancé avant de lancer ce service
+      - logs-service   # On s'assure que le service de logs soit lancé avant l'API
         
   client:
     build:
@@ -61,6 +65,33 @@ services:                 # Liste des serveurs (nos conteneurs !)
     networks:
       - oquiz-network
 
+  # Service de logs (microservice Express + MongoDB)
+  logs-service:
+    build:
+      context: ./logs-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      PORT: 3500
+      DATABASE_URL: ${LOGS_DATABASE_URL}  # URL de connexion MongoDB dans le réseau Docker
+    ports:
+      - ${LOGS_SERVICE_LOCAL_PORT}:3500
+    networks:
+      - oquiz-network
+    depends_on:
+      - logs-db
+
+  # Base de données MongoDB pour le service de logs
+  logs-db:
+    image: mongo:8
+    restart: unless-stopped
+    networks:
+      - oquiz-network
+    volumes:
+      - logs-volume:/data/db  # Persistance des logs MongoDB
+    ports:
+      - ${LOGS_DB_LOCAL_PORT}:27017
+
   # Reverse proxy nginx
   proxy:
     image: nginx:alpine
@@ -86,4 +117,5 @@ networks:        # Liste des réseaux
 
 volumes:         # Liste de nos volumes
   oquiz-volume:  # Volume pour la persistance des données de la BDD (sur l'hôte, au cas où le conteneur est supprimé, les données restent !)
+  logs-volume:   # Volume pour la persistance des logs MongoDB
   # Note : on aurait pu mettre un dosier local comme `./oquiz-data` que l'on ajoute au gitignore
