@@ -10,4 +10,8 @@ export const LogLevelSchema = z.enum([
     "silly"
 ]);
 
-export const CreateLogSchema
+export const CreateLogSchema = z.looseObject({
+    level: LogLevelSchema,
+    message: z
+        
+})
