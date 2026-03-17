@@ -1,4 +1,4 @@
-import { logger } from "../lib/log.ts";
+import { logger } from "../lib/logger.ts";
 import { Role } from "../models/index.ts";
 import { Request } from "express";
 

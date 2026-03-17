@@ -3,7 +3,7 @@ import type { Request, Response, NextFunction } from "express";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 import { ForbiddenError, UnauthorizedError } from "../lib/errors.ts";
 import { config } from "../../config.ts";
-import logger from "../lib/logger.ts";
+import { logger } from "../lib/logger.ts";
 
 export function checkRoles(roles: Role[]) {
   return (req: Request, res: Response, next: NextFunction) => {

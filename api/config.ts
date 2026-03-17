@@ -12,4 +12,6 @@ export const config = {
   isProd: process.env.NODE_ENV === "production" || false,
   jwtSecret: process.env.JWT_SECRET,
   logLevel: process.env.LOG_LEVEL || "info",
+  logServiceHost: process.env.LOGS_SERVICE_HOST || "localhost",
+  logServicePort: parseInt(process.env.LOGS_SERVICE_PORT || "3500"),
 };

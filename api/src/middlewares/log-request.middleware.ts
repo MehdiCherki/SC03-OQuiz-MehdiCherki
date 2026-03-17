@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { randomUUID } from "node:crypto";
-import { logger } from "../lib/log.ts";
+import { logger } from "../lib/logger.ts";
 
 export function logRequest(req: Request, res: Response, next: NextFunction) {
   const id = req.get("x-request-id") || randomUUID();
@@ -21,7 +21,10 @@ export function logRequest(req: Request, res: Response, next: NextFunction) {
       status: res.statusCode,
       duration,
       ip: req.ip,
+      service: "oquiz",
       userAgent: req.get("user-agent"),
+      userId: `${req.user?.id}`,
+      requestId: req.requestId,
     });
   });
 
