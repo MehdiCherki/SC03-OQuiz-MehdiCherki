@@ -1,0 +1,87 @@
+@startuml Diagramme de classe
+
+class User {
+  - id: UUID
+  - firstname: String
+  - lastname: String
+  - email: String
+  - password: String
+  - role: String
+  --
+  + register(): void
+  + login(): boolean
+  + getQuizzes(): List<Quiz>
+}
+
+class Quiz {
+  - id: UUID
+  - titre: String
+  - description: String
+  - author: User
+  --
+  + addQuestion(q: Question): void
+  + assignTag(tag: Tag): void
+  + getScore(user: User): int
+}
+
+class Question {
+  - id: UUID
+  - description: String
+  - anecdote: String
+  - wiki: String
+  - quiz: Quiz
+  - level: Level
+  --
+  + addChoice(choice: Choice): void
+  + isCorrect(choiceId: UUID): boolean
+}
+
+class Level {
+  - id: UUID
+  - name: String
+}
+
+class Choice {
+  - id: UUID
+  - description: String
+  - is_valid: Boolean
+  - quiz: Quiz
+}
+
+class Tag {
+  - id: UUID
+  - name: String
+  - parent: Tag
+  --
+  + addSubTag(tag: Tag): void
+}
+
+class Attempt {
+  - id: UUID
+  - date: DateTime
+  - user_score: int
+  - max_score: int
+  - user: User
+  - quiz: Quiz
+  --
+  + calculatePercentage(): float
+}
+
+' Relations
+User "1" --> "0..*" Quiz : creates
+User "1" --> "0..*" Attempt : attempts
+
+Quiz "1" --> "0..*" Question
+Quiz "1" --> "0..*" Choice
+Quiz "1" --> "0..*" Attempt
+Quiz "1" --> "0..*" Tag : tagged with
+
+Question "1" --> "0..*" Choice
+Question "1" --> Level
+
+Tag "1" --> "0..*" Tag : sub-tags
+
+Attempt "1" --> Quiz
+Attempt "1" --> User
+
+@enduml

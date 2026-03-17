@@ -33,8 +33,10 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4
 - **Signature :** garantit l’intégrité et l’authenticité du jeton. Elle est générée en combinant le header et le payload, puis en les signant avec une clé secrète ou une paire de clés privée/publique. Un backend qui reçoit un JWT peut savoir, grâce à au secret, que c'est bien lui qui l'a généré et que le payload n'a pas été falsifié.
 
 ```js
-HMACSHA256(base64UrlEncode(header) + "." + base64UrlEncode(payload), secret);
+HMACSHA256(base64UrlEncode(header) + "." + base64UrlEncode(payload), secret)
 ```
+
+
 
 ## Utilisations courantes des JWT
 
@@ -58,14 +60,12 @@ HMACSHA256(base64UrlEncode(header) + "." + base64UrlEncode(payload), secret);
 Les JWT (JSON Web Tokens) sont conçus pour transporter des revendications (informations) sur un utilisateur. Les informations couramment stockées incluent :
 
 ### ✅ Données sûres et utiles à stocker
-
 - **Identifiant utilisateur (User ID)** : Un identifiant unique (par ex., `userId`).
 - **Rôles/Permissions** : Pour autoriser rapidement les actions d'un utilisateur (par ex., `role: "admin"`).
 - **Expiration** : (`exp` claim) La date et l'heure d'expiration du jeton.
 - **Date d'émission** : (`iat` claim) La date et l'heure de création du jeton.
 
 ### ❌ Données sensibles à éviter
-
 - **Mots de passe** : Ne jamais stocker de mots de passe ou de hachages de mots de passe.
 - **Informations personnelles identifiables (PII)** : Adresse e-mail, adresse postale, numéro de téléphone, etc., sauf si c'est absolument nécessaire.
 - **Secrets** : Clés privées, jetons ou autres identifiants sensibles d'application.

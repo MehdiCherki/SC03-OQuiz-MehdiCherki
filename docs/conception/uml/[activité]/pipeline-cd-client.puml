@@ -1,0 +1,36 @@
+@startuml Pipeline de déploiement continue
+'''Pipeline  CD du client
+start
+
+repeat 
+  partition IDE {
+    :Mise à jour de la branche principale;
+    :Création d'une branche dédiée;
+    :Développement et ajout de tests;
+    :Commit & push;
+  }
+
+  partition GitHub {
+    :Ouverture et merge d'une Pull Request;
+
+    partition GitHub Action {
+      :Déclenchement du workflow CD;
+      :Setup Node.js et dépendances;
+
+      :Lancement des tests;
+      if (Échec des tests ?) then (oui)
+        :Arrêt de la pipeline;
+        stop
+      else (non)
+      endif
+
+      :Création du build client;
+      :Push automatique vers Surge;
+    }
+  }
+
+  partition Serveur CDN Surge {
+    :Redéploiement automatique;
+  }
+
+@enduml

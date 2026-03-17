@@ -1,0 +1,48 @@
+' Le système à modéliser est un site e-commerce. 
+' Ce système peut être consulté par les clients finaux ainsi que par des administrateurs de la plateforme.
+' Le client peut rechercher des produits et les ajouter à son panier. 
+' Il a la possibilité de passer une commande, ce qui inclut obligatoirement le paiement ainsi que l’envoi d’un e-mail de confirmation. 
+' Le client peut aussi consulter l’historique de ses commandes, mais cette fonction est accessible uniquement après s’être connecté. 
+' Par ailleurs, il faut s'être inscrit une première fois pour pouvoir se connecter par la suite.
+' L’administrateur, quant à lui, peut gérer les produits du site, c’est-à-dire ajouter, modifier ou supprimer des produits, ainsi que gérer les commandes reçues. 
+
+@startuml ecommerce
+left to right direction
+
+actor Client
+actor Administrateur
+
+rectangle "Site E-Commerce" {
+
+  (S'inscrire) as UC1
+  (Se connecter) as UC2
+  (Rechercher un produit) as UC3
+  (Ajouter au panier) as UC4
+  (Passer une commande) as UC5
+  (Paiement) as UC6
+  (Envoyer confirmation email) as UC7
+  (Consulter historique de commande) as UC8
+
+  (Gérer les produits) as UC9
+  (Gérer commandes) as UC10
+
+  ' Relations Client
+  Client --> UC3
+  Client --> UC4
+  Client --> UC5
+  Client --> UC8
+
+  ' Relations include
+  UC5 --> UC6 : <<include>>
+  UC5 --> UC7 : <<include>>
+
+  ' Relation extend
+  UC8 ..> UC2 : <<include>>
+  UC2 .> UC1 : <<include>>
+
+  ' Relations Admin
+  Administrateur --> UC9
+  Administrateur --> UC10
+}
+
+@enduml

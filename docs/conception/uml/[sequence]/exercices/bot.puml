@@ -1,0 +1,30 @@
+' Un utilisateur pose une question à un bot conversationnel. 
+' Le bot détermine si la question est pertinente ou non grâce à LLM. 
+' Si elle l'est, il fait une recherche dans la base de données pour trouver la réponse. 
+' Si la question n'est pas pertinente, il demande à l'utilisateur de reformuler sa question. 
+' En parallèle, le bot trace la question envoyée avec le tag "pertinent" ou "non pertinent".
+
+@startuml Bot conversationnel
+actor Utilisateur
+participant "Bot conversationnel" as Bot
+participant "LLM" as LLM
+database "Base de données" as DB
+Utilisateur -> Bot : Poser une question
+activate Bot
+alt Question pertinente
+  Bot -> LLM : Vérifier pertinence
+  activate LLM
+  LLM --> Bot : Question pertinente
+else Question non pertinente
+  LLM --> Bot : Question non pertinente
+  deactivate LLM
+  Bot -> Utilisateur : Reformuler la question
+end
+Bot -> DB : Rechercher réponse
+activate DB
+DB --> Bot : Réponse trouvée
+deactivate DB
+Bot -> Utilisateur : Afficher réponse
+Bot ->> DB : Tracer question
+deactivate Bot
+@enduml

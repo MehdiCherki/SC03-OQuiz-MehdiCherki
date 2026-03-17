@@ -1,0 +1,43 @@
+@startuml Pipeline d'intégration continue
+'''Pipeline CI de l'API
+
+start
+
+repeat
+  partition IDE {
+    :Mise à jour de la branche principale;
+    :Création d'une branche dédiée;
+    repeat
+      :Développement et ajout de tests;
+      :Commit (commande Git);
+      :Lancement automatique du pre-commit (Husky);
+    repeat while (Erreur du linter ?) is (oui) not (non)
+      :Commit enregistré;
+      :Push;
+  }
+
+  partition GitHub {
+    :Ouverture d'une Pull Request;
+
+    partition GitHub Actions {
+      repeat
+        :Déclenchement du workflow CI;
+        :Setup Node.js et installation des dépendances;
+        :Exécution des tests unitaires;
+        
+        if (Tests OK ?) then (oui)
+          :Workflow réussi;
+        else (non)
+          :Corriger le code dans l'IDE;
+        endif
+
+      repeat while (Push de correction ?) is (oui) not (non)
+    }
+
+    :Merge de la Pull Request;
+  }
+
+repeat while (Nouvelles fonctionnalités à développer ?) is (oui)
+
+stop
+@enduml

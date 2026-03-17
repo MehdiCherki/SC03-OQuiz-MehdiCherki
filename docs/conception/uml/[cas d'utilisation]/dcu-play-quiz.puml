@@ -1,0 +1,22 @@
+@startuml cas d'utilisation
+left to right direction
+
+actor Membre
+
+rectangle "Plateforme de quiz" {
+  usecase "Jouer un quiz" as UC1
+  usecase "Se connecter" as UC2
+  usecase "Voir les résultats" as UC3
+}
+
+Membre -- UC1
+
+' include indique une action pré-requise
+UC1 .> UC2 : <<include>>
+
+' exclude indique une action complémentaire
+UC1 .> UC3 : <<extends>>
+
+
+
+@enduml

@@ -1,0 +1,20 @@
+@startuml JWT
+
+actor Utilisateur
+participant "Client SPA" as SPA
+participant "API Express" as API
+
+== Connexion ==
+Utilisateur -> SPA : Formulaire d'authentification
+SPA -> API : POST /auth/login (+ credentials)
+API -> API : Génère JWT signé
+API -> SPA : JWT dans la réponse (ou Set-Cookie)
+SPA -> SPA : Stockage JWT (localStorage ou cookie)
+
+== Requête Authentifiée ==
+Utilisateur -> SPA : Action utilisateur
+SPA -> API : Requête API + JWT (Header Authorization ou Cookie)
+API -> API : Vérifie signature & expiration
+API -> SPA : Réponse API
+
+@enduml

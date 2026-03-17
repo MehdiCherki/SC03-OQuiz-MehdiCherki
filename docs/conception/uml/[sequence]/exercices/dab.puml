@@ -1,0 +1,28 @@
+@startuml Distributeur automatique de billets
+
+actor Client
+participant DAB
+participant "Système bancaire" as Banque
+
+Client -> DAB : Demande de retrait
+
+activate DAB
+DAB -> Banque : Interroger solde
+
+activate Banque
+
+alt Solde disponible
+    Banque -> Banque : Vérification solde
+    Banque --> DAB : Solde disponible
+else Solde insuffisant
+    DAB -> Client : Solde insuffisant
+end
+
+DAB ->> Banque : Modification solde
+DAB -> Client : Sortie billets
+
+deactivate Banque
+
+deactivate DAB
+
+@enduml

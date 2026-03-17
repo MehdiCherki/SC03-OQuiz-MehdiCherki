@@ -1,0 +1,45 @@
+@startuml Pipeline de déploiement continue
+'''Pipeline  CD pour l'API
+''' Non demandé par le challenge, mais pour la curiosité sur ce qu'il est possible de faire
+start
+
+repeat 
+  partition IDE {
+    :Mise à jour de la branche principale;
+    :Création d'une branche dédiée;
+    :Développement et ajout de tests;
+
+    if (Modificaton structure BDD ?) then (oui)
+      :Générer fichiers de migration;
+    else (non)
+    endif
+
+    :Commit & push;
+  }
+
+  partition GitHub {
+    :Ouverture et merge d'une Pull Request;
+
+    partition GitHub Action {
+      :Déclenchement du workflow CD;
+      :Setup Node.js et dépendances;
+
+      :Lancement des tests;
+      if (Échec des tests ?) then (oui)
+        :Arrêt de la pipeline;
+        stop
+      else (non)
+      endif
+
+      :Création des images Docker;
+      :Push automatique vers DockerHub;
+    }
+  }
+
+  partition Serveur de production {
+    :Connexion SSH manuelle;
+    :Pull des images;
+    :Relance des services via compose;
+  }
+
+@enduml

@@ -1,0 +1,24 @@
+@startuml Tests d'intégration
+start
+
+:Exécuter `npm run test:spec --prefix api`;
+
+:Charger les variables d'environnement;
+
+:Créer un conteneur Postgres (BDD de test);
+
+:Appliquer les migrations à la BDD;
+
+:Lancement d'un serveur HTTP Express dédié aux tests;
+
+repeat
+  :Exécuter un test;
+  :Vider les tables de la BDD;
+repeat while (Reste des tests ?)
+
+:Arrêter le serveur HTTP;
+
+:Stopper le conteneur Postgres;
+
+stop
+@enduml

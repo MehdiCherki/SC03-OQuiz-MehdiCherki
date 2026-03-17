@@ -1,0 +1,27 @@
+@startuml Mécanisme de sessions
+
+actor Utilisateur
+participant "Client SPA" as SPA
+participant "API Express" as API
+database "Session Store (Redis, DB...)" as Store
+
+== Connexion ==
+Utilisateur -> SPA : Formulaire d'authentification
+SPA -> API : POST /auth/login (+ credentials)
+API -> API : Vérification des credentials
+API -> Store : Crée une session dans un store
+Store --> API : Identification de session (sessionId)
+API -> SPA : Set-Cookie (sessionId)
+SPA -> SPA : Stockage Cookie (sessionId)
+SPA -> Utilisateur : Redirection ou mise à jour
+
+== Requête authentifiée ==
+Utilisateur -> SPA : Action utilisateur
+SPA -> API : Requête API + Cookie (sessionId)
+API -> Store : Vérifier sessionId
+Store --> API : Données de session (dont ID utilisateur)
+API -> API : Construire une réponse
+API -> SPA : Réponse API
+SPA --> Utilisateur : Affichage des données
+
+@enduml

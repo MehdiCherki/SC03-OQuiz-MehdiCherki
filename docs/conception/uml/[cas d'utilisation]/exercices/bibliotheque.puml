@@ -1,0 +1,38 @@
+@startuml Système de Gestion de Bibliothèque
+
+left to right direction
+hide stereotype
+skinparam packageStyle rectangle
+
+actor "Adhérent" as adherent
+actor "Bibliothécaire" as biblio
+actor "Système de Paiement" as paiement << system >>
+
+rectangle "Système de Gestion de Bibliothèque" {
+  usecase "Consulter le catalogue" as UC1
+  usecase "Rechercher un livre" as UC2
+  usecase "Emprunter un livre" as UC3
+  usecase "Retourner un livre" as UC4
+  usecase "Payer les frais de retard" as UC5
+  usecase "Gérer les livres" as UC6
+  usecase "Enregistrer un nouvel adhérent" as UC7
+  usecase "Vérifier la disponibilité" as UC8
+}
+
+adherent --> UC1
+adherent --> UC2
+adherent --> UC3
+adherent --> UC4
+adherent --> UC5
+
+biblio --> UC6
+biblio --> UC7
+biblio --> UC3
+biblio --> UC4
+
+UC3 .> UC8 : <<include>>
+UC5 ..> paiement : <<uses>>
+
+note right of UC3 : L'emprunt nécessite une vérification\nde disponibilité du livre et\ndu statut de l'adhérent
+
+@enduml

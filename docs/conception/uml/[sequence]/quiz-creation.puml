@@ -1,0 +1,47 @@
+@startuml Quiz creation
+actor Auteur
+boundary Interface
+control API
+database BDD
+
+== Affichage d'un formulaire ==
+Auteur -> Interface : sélectionne le bouton d'ajout de quiz
+Interface --> Auteur : affiche une fenêtre de dialogue contenant un formulaire
+
+== Création initiale du quiz ==
+Auteur --> Interface : remplit et soumet le formulaire de création {titre, description}
+Interface -> API : POST /api/quizzes {titre, description}
+
+API -> API : valide les données
+API -> BDD : INSERT INTO "quiz" {titre, description, author_id}
+activate BDD
+BDD --> API : ID du quiz généré
+deactivate BDD
+API --> Interface : 201 + ID du quiz généré
+Interface --> Auteur : redirige vers une page d'édition du quiz
+
+== Insertion des questions ==
+loop pour chaque question
+  Auteur -> Interface : remplit dans un champ la description d'une question
+  Interface -> API : POST /quizzes/:quiz_id/questions {description}
+  API -> BDD : INSERT INTO "question" {description, quiz_id}
+  activate BDD
+  BDD --> API : ID de la question générée
+  deactivate BDD
+  API --> Interface : 201 + ID de la question générée
+  Interface --> Auteur : indicateur visuel indiquant la bonne création 
+
+  loop pour chaque choix
+    Interface --> Auteur : ouvre un champ à remplir pour une proposiiton de réponse
+    Auteur -> Interface : remplit le champ avec une proposition et sa véracité
+    Interface -> API : POST /questions/:id/choices { description, is_valid }
+    API -> BDD : INSERT INTO choice {description, is_valid, question_id}
+    activate BDD
+    BDD --> API : ID de la proposition générée
+    deactivate BDD
+    API --> Interface : ID de la proposition générée
+    Interface --> Auteur : indicateur visuel indiquant la bonne création 
+  end
+end
+
+@enduml

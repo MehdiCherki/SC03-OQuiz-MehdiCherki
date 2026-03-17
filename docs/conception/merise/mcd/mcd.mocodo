@@ -1,0 +1,19 @@
+NIVEAU: code niveau, libellé
+Caractérise, 0N NIVEAU, 11 QUESTION
+QUESTION: code question, description, anecdote, lien wiki
+Possède, 0N QUESTION, 11 PROPOSITION
+PROPOSITION: code proposition, description, est valide
+
+Compose, 11 QUESTION, 0N QUIZ
+
+UTILISATEUR: code utilisateur, prénom, nom, email, mot de passe, role
+Créé, 0N UTILISATEUR, 11 QUIZ
+QUIZ: code quiz, titre, description
+Appartient, 0N QUIZ, 0N THÈME
+THÈME : code thème, nom
+
+:
+Joue, 0N UTILISATEUR, 0N QUIZ: horodatage, score utilisateur, score max
+:
+:
+Sous-catégorise, 0N THÈME, 01 THÈME

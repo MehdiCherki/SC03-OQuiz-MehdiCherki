@@ -1,0 +1,84 @@
+@startuml Base de données
+' Définition des entités avec les attributs
+entity "user" as user {
+  *id : SERIAL
+  --
+  firstname : TEXT
+  lastname : TEXT
+  email : TEXT <<unique>>
+  password : TEXT
+  role : TEXT
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity "quiz" as quiz {
+  *id : SERIAL
+  --
+  title : TEXT
+  description : TEXT
+  author_id : INT <<FK>>
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity "level" as level {
+  *id : SERIAL
+  --
+  name : TEXT <<unique>>
+}
+
+entity "question" as question {
+  *id : SERIAL
+  --
+  description : TEXT
+  anecdote : TEXT
+  wiki_link : TEXT
+  quiz_id : INT <<FK>>
+  level_id : INT <<FK>>
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity "choice" as choice {
+  *id : SERIAL
+  --
+  description : TEXT
+  is_valid : BOOLEAN
+  question_id : INT <<FK>>
+}
+
+entity "tag" as tag {
+  *id : SERIAL
+  --
+  name : TEXT <<unique>>
+  color : TEXT
+  parent_tag_id : INT <<FK>>
+}
+
+entity "attempt" as attempt {
+  *id : SERIAL
+  --
+  user_id : INT <<FK>>
+  quiz_id : INT <<FK>>
+  user_score : INT
+  max_possible_score : INT
+  created_at : TIMESTAMPTZ
+}
+
+entity "quiz_has_tag" as quiz_has_tag {
+  *quiz_id : INT <<FK>>
+  *tag_id : INT <<FK>>
+}
+
+' Relations entre entités
+user ||--o{ quiz : author
+user ||--o{ attempt : "performs"
+quiz ||--o{ question : contains
+quiz ||--o{ attempt : attempted
+quiz ||--o{ quiz_has_tag : "tagged"
+tag ||--o{ quiz_has_tag : "tags"
+tag ||--|| tag : "parent of" 
+level ||--o{ question : "difficulty"
+question ||--o{ choice : has
+question ||--o{ attempt : used_in

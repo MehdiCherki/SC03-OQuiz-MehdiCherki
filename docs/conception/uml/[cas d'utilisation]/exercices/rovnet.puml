@@ -1,0 +1,29 @@
+' Rovnet est un robot télécommandé utilisé pour l'inspection à distance. 
+' Le technicien interagit avec le système rovnet pour visualiser l'environnement, ce qui inclut le démarrage d'une campagne et la réception des données de distance. 
+' Les fonctionnalités de prise de photos et de pilotage de la caméra étendent le cas d'utilisation principal de visualisation de l'environnement. 
+' Le technicien peut également archiver les photos prises.
+
+@startuml rovnet
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor Technicien
+
+rectangle rovnet {
+  usecase "Visualiser l'environnement" as UC1
+  usecase "Démarrer une campagne" as UC2
+  usecase "Recevoir les données de distance" as UC3
+  usecase "Prendre une photo" as UC4
+  usecase "Piloter la caméra" as UC5
+  usecase "Archiver les photos" as UC6
+}
+
+Technicien -- UC1
+UC1 .> UC2 : <<include>>
+UC1 .> UC3 : <<include>>
+UC4 .> UC1 : <<extends>>
+UC5 .> UC1 : <<extends>>
+Technicien -- UC6
+
+@enduml

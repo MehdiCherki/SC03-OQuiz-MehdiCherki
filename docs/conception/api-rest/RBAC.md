@@ -9,6 +9,7 @@
 | GET   | `/quizzes/:id`           | no       | yes    | yes    | yes   |
 | GET   | `/quizzes/:id/questions` | no       | yes    | yes    | yes   |
 
+
 ### 🛠️ Quiz Edition
 
 | Verbe  | Chemin                  | Visiteur | Membre | Auteur | Admin |
@@ -19,11 +20,11 @@
 | DELETE | `/quizzes/:id/tags/:id` | no       | no     | self   | yes   |
 
 `self` = un auteur peut modifier uniquement les quiz dont il est le créateur
-
 - on ne pourra pas forcement le codé au niveau du routeur
   - => logique métier liée à un attribut
   - => tout à fait possible de le factoriser, mais alourdie la mise en place des routes
   - => codera cette logique directement dans le controleur associée
+
 
 ### ❓ Questions & Choix
 
@@ -38,12 +39,14 @@
 
 ### 🎮 Quiz Player
 
+
 | Verbe | Chemin                  | Visiteur | Membre | Auteur | Admin |
 | ----- | ----------------------- | -------- | ------ | ------ | ----- |
 | POST  | `/quizzes/:id/attempts` | no       | yes    | yes    | yes   |
-| GET   | `/quizzes/:id/attempts` | no       | no     | self   | yes   |
+| GET   | `/quizzes/:id/attempts` | no       | no     | self     | yes   |
 
 Un auteur peut voir toutes les tentatives d'un quiz s'il en est le créateur
+
 
 ### 👤 Utilisateurs
 
@@ -51,7 +54,7 @@ Un auteur peut voir toutes les tentatives d'un quiz s'il en est le créateur
 | ----- | --------------------- | -------- | ------ | ------ | ----- |
 | GET   | `/users`              | no       | no     | no     | yes   |
 | GET   | `/users/:id/profile`  | no       | yes    | yes    | yes   |
-| GET   | `/users/:id/attempts` | no       | self\* | self\* | yes   |
+| GET   | `/users/:id/attempts` | no       | self*  | self*  | yes   |
 
 `*` = Un auteur peut voir les tentatives que les utilisateurs ont effectuées sur ses quiz (et uniquement les quiz dont il est l'auteur).
 
@@ -67,12 +70,14 @@ Un auteur peut voir toutes les tentatives d'un quiz s'il en est le créateur
 
 ### 🏷️ Thèmes
 
+
 | Verbe  | Chemin      | Visiteur | Membre | Auteur | Admin |
 | ------ | ----------- | -------- | ------ | ------ | ----- |
 | GET    | `/tags`     | no       | yes    | yes    | yes   |
 | GET    | `/tags/:id` | no       | yes    | yes    | yes   |
 | POST   | `/tags`     | no       | no     | yes    | yes   |
-| PATCH  | `/tags/:id` | no       | no     | self\* | yes   |
-| DELETE | `/tags/:id` | no       | no     | self\* | yes   |
+| PATCH  | `/tags/:id` | no       | no     | self*  | yes   |
+| DELETE | `/tags/:id` | no       | no     | self*  | yes   |
 
 `*` = sous entendu, il faudrait rajouter un attribut `author_id` sur un `tag` afin de vérifier si l'auteur a le droit de modifier le tag s'il en est propriétaire
+

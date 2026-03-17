@@ -1,12 +1,10 @@
 # API Endpoints
 
 Conception de l'API :
-
 - outils de conception et de documentation
 - réfléchir aux endpoints qui seront utilisés par le front pour le dynamiser.
 
-API base URL :
-
+API base URL : 
 - `/api`
 
 ## 📚 Quiz views
@@ -18,8 +16,7 @@ API base URL :
 | GET   | `/quizzes/:id`           | -       | `Quiz+Auteur,Tags`        | Quiz complet    |                                       | Jouer         |
 | GET   | `/quizzes/:id/questions` | -       | `Array<Questions,Choix>`  |                 |                                       | Jouer         |
 
-Remarque, on aurait le choix :
-
+Remarque, on aurait le choix : 
 - Option 1 : `GET /quizzes/:id` qui renvoie `Quiz+auteur+tags+questions+choix` (1 seule requête à l'API)
 - Option 2 : `GET /quizzes/:id` + `GET /quizzes/:id/questions` (2 requêtes à l'API)
 
@@ -43,8 +40,7 @@ Remarque, on aurait le choix :
 | PATCH  | `/choices/:id`           | `{description, is_valid}` | -        | Modifier un choix             | -     | Édition |
 | DELETE | `/choices/:id`           | -                         | -        | Supprimer un choix            |       | Édition |
 
-Notes :
-
+Notes : 
 - On pourrait ajouter une route `PUT /questions/:id/choices` avec comme body `Array<{ description, is_valid}>` pour venir modifier tous les choix d'un quiz d'un seul coup
 
 ## 🎮 Quiz Player
@@ -59,19 +55,19 @@ Notes :
 
 ## 👤 Utilisateur & Authentification
 
-| Verbe | Chemin                | Request | Response                     | Description                 | Notes | Pages      |
-| ----- | --------------------- | ------- | ---------------------------- | --------------------------- | ----- | ---------- |
-| GET   | `/users`              | -       | `Array<User>`                | Liste des utilisateurs      | -     | Admin      |
-| GET   | `/users/:id/profile`  | -       | `{User, nb_quiz_played}`     | Profil d’un utilisateur     | -     | Profil     |
-| GET   | `/users/:id/attempts` | -       | `Array<{quiz, score, date}>` | Tentatives d’un utilisateur | -     | Historique |
+| Verbe | Chemin                | Request             | Response                      | Description                     | Notes | Pages      |
+| ----- | --------------------- | ------------------- | ----------------------------- | ------------------------------- | ----- | ---------- |
+| GET   | `/users`              | -                   | `Array<User>`                 | Liste des utilisateurs          | -     | Admin      |
+| GET   | `/users/:id/profile`  | -                   | `{User, nb_quiz_played}`      | Profil d’un utilisateur         | -     | Profil     |
+| GET   | `/users/:id/attempts` | -                   | `Array<{quiz, score, date}>`  | Tentatives d’un utilisateur     | -     | Historique |
 
-| Verbe | Chemin           | Request             | Response                      | Description                     | Notes | Pages      |
-| ----- | ---------------- | ------------------- | ----------------------------- | ------------------------------- | ----- | ---------- |
-| POST  | `/auth/register` | Note 1              | `User`                        | Inscription                     | -     | Signup     |
-| POST  | `/auth/login`    | `{email, password}` | `{accessToken, refreshToken}` | Connexion                       | -     | Signin     |
-| POST  | `/auth/refresh`  | Refresh token       | `{accessToken, refreshToken}` | Renouvellement automatique      | -     | Tâche fond |
-| POST  | `/auth/me`       | -                   | `User`                        | Infos de l’utilisateur connecté | -     | Bannière   |
-| POST  | `/auth/logout`   | -                   | -                             | Déconnexion                     | -     | Profil     |
+| Verbe | Chemin                | Request             | Response                      | Description                     | Notes | Pages      |
+| ----- | --------------------- | ------------------- | ----------------------------- | ------------------------------- | ----- | ---------- |
+| POST  | `/auth/register`      | Note 1              | `User`                        | Inscription                     | -     | Signup     |
+| POST  | `/auth/login`         | `{email, password}` | `{accessToken, refreshToken}` | Connexion                       | -     | Signin     |
+| POST  | `/auth/refresh`       | Refresh token       | `{accessToken, refreshToken}` | Renouvellement automatique      | -     | Tâche fond |
+| POST  | `/auth/me`            | -                   | `User`                        | Infos de l’utilisateur connecté | -     | Bannière   |
+| POST  | `/auth/logout`        | -                   | -                             | Déconnexion                     | -     | Profil     |
 
 - Note 1 : `{firstname, lastname, email, password, confirm}`
 
@@ -94,3 +90,4 @@ Notes :
 | POST   | `/tags`     | `{name, color}` | -                                          | Créer un thème     | -     | Admin   |
 | PATCH  | `/tags/:id` | `{name, color}` | -                                          | Modifier un thème  | -     | Admin   |
 | DELETE | `/tags/:id` | -               | -                                          | Supprimer un thème | -     | Admin   |
+

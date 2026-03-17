@@ -13,8 +13,7 @@
 ## Modèles de gestion des permissions
 
 ### RBAC (Role-Based Access Control)
-
-- **Principe** :
+- **Principe** : 
   - on associe les permissions aux rôles, puis les rôles aux utilisateurs.
 - **Exemple** :
   - Rôle Admin → toutes les permissions
@@ -24,14 +23,13 @@
   - Facile à maintenir avec peu de rôles
 - **Inconvénients** :
   - Peu flexible dans les cas complexes (contextes variables)
-- **Cas d’usage** :
+- **Cas d’usage** : 
   - Entreprises structurées, applications avec rôles bien définis.
 
 ### ABAC (Attribute-Based Access Control)
-
-- **Principe** :
+- **Principe** : 
   - accès basé sur des attributs de l’utilisateur, de la ressource, et du contexte.
-- **Exemple** :
+- **Exemple** : 
   - "Autoriser l'accès si l’utilisateur est dans le même département que la ressource"
   - "Autoriser la modification si l'utilisateur est le créateur de la ressource"
 - **Avantages** :
@@ -40,12 +38,11 @@
 - **Inconvénients** :
   - Implémentation plus complexe
   - Plus difficile à auditer (donc tester automatiquement est incontournable)
-- **Cas d’usage** :
+- **Cas d’usage** : 
   - Systèmes complexes, administration publique.
 
 ### ACL (Access Control List)
-
-- **Principe** :
+- **Principe** : 
   - chaque ressource possède une liste de permissions associée à des utilisateurs ou rôles.
 - **Exemple** :
   - Fichier X → {Jean : Lecture ; Marie : Lecture/Écriture}
@@ -53,7 +50,7 @@
   - Contrôle très fin par ressource
 - **Inconvénients** :
   - UX souvent complexe
-- **Cas d’usage** :
+- **Cas d’usage** : 
   - Systèmes de fichiers, outils de collaboration comme Google Docs.
 
 Attention à ne pas confondre avec l'acronyme `Access Control Layer` = couche logicielle qui gère les droits d'accès (terme générique donc).
@@ -61,7 +58,6 @@ Attention à ne pas confondre avec l'acronyme `Access Control Layer` = couche lo
 ### Approches hybrides
 
 Il est tout à fait possible de combiner RBAC et ABAC. Par exemple :
-
 - RBAC : _tu es auteur_
 - ABAC : _mais tu ne peux modifier que les articles que tu as créés_
 
@@ -101,6 +97,7 @@ C'est une implémentation courante dans les apps modernes.
 | `user:patch-one`  | `PATCH /users/:id`  |
 | `user:delete-one` | `DELETE /users/:id` |
 
+
 ### Associer aux ACTIONS METIER
 
 - **Explication** : une action/fonction métier = une permission (niveau `service`).
@@ -115,6 +112,7 @@ C'est une implémentation courante dans les apps modernes.
 | `user:update` | Modifier un utilisateur  |
 | `user:delete` | Supprimer un utilisateur |
 
+
 ## Résumé des cas d'usage
 
 | Besoin                                        | Approche possible                                                                               |
@@ -123,3 +121,5 @@ C'est une implémentation courante dans les apps modernes.
 | Plusieurs rôles par utilisateurs              | Table de jointure `user_roles` pour attribuer plusieurs rôles à un même utilisateur             |
 | Gestion fine des permissions par rôle         | Modèle URP : `users`, `roles`, `permissions`, `role_permissions`                                |
 | Gestion fine des permissions par utilisateurs | Modèle URP + table `user_permissions` pour ajouter des permissions spécifiques à un utilisateur |
+
+

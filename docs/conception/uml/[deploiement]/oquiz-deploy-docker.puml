@@ -1,0 +1,56 @@
+@startuml Déploiement
+
+actor "Navigateur" as client
+
+node "Virtual Private Server (VPS)" {
+
+  node "Docker Network" {
+    
+    node "Reverse Proxy (NGinx)" as proxy {
+      port 80
+      port 443
+    }
+    
+    node "Conteneur API" {
+      component "Serveur HTTP (API Node.js)" as api #LightBlue {
+        artifact "Code JS généré\n(source TypeScript)"
+      }
+    }
+
+    node "Conteneur Backoffice" {
+      component "Serveur HTTP (Adminer - PHP)" as backoffice #LightBlue {
+      }
+    }
+
+    node "Conteneur Client" {
+      component "Serveur HTTP (NGinx)" as spa #LightBlue {
+        artifact "Fichiers statiques générés\n(source Svelte/Vite)"
+      }
+    }
+
+    node "Conteneur Base de Données" {
+      database "Serveur PostgreSQL" as database #LightCyan {
+        artifact "tables oquiz" as db_tables
+      }
+    }
+
+    node "Docker Volume" {
+      artifact "volume data" as volume_data
+    }
+  }
+
+
+  api -(0- database
+  backoffice -(0- database
+
+  db_tables ~~ volume_data: (bind mount)
+
+  proxy -- api
+  proxy -- spa
+  proxy --backoffice
+
+  client -- 443
+  client -- 80
+
+}
+@enduml
