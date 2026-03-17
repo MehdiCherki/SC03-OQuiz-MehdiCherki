@@ -2,7 +2,7 @@ import assert from "node:assert";
 import { describe, it } from "node:test";
 import { prisma } from "../models/index.ts";
 import { authedRequester } from "../../test/index.ts";
-import logger from "../lib/logger.ts";
+import { logger } from "../lib/logger.ts";
 
 describe("globalErrorHandler", () => {
   const safePrismaLevelCreate = prisma.level.create;
