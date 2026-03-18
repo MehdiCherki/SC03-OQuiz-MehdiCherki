@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import * as logService from "../services/log.service.ts";
 
-export async function createLog(req: Request, res: Response) {
+export async function createLog(req: Request, res: Response) :Promise<void>{
   // validation des données
   await logService.createLog(req.body);
 
@@ -11,7 +11,7 @@ export async function createLog(req: Request, res: Response) {
 export async function getLogs(req: Request, res: Response) {
   // validation des données
 
-  const { logs } = await logService.getLogs();
+  const logs = await logService.getLogs();
 
   res.json({
     data: logs,
