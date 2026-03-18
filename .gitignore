@@ -7,7 +7,7 @@ api/rejections.log
 .env
 dist
 generated
-
+uploads
 
 # Logs
 logs
