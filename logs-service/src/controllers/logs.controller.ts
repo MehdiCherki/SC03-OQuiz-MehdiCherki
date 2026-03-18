@@ -1,6 +1,10 @@
 import type { Request, Response } from "express";
 import * as logService from "../services/log.service.ts";
-import { CreateLogSchema } from "../validations/logs.ts";
+import {
+  CreateLogSchema,
+  CreateMultipleLogsSchema,
+  LogFilterSchema,
+} from "../validations/logs.ts";
 import { IdParamSchema } from "../validations/utils.ts";
 import { NotFoundError } from "../lib/errors.ts";
 
@@ -11,10 +15,13 @@ export async function createLog(req: Request, res: Response): Promise<void> {
 }
 
 export async function getLogs(req: Request, res: Response): Promise<void> {
-  const logs = await logService.getLogs();
+  const filters = LogFilterSchema.parse(req.query);
+
+  const { logs, pagination } = await logService.getLogs(filters);
 
   res.json({
     data: logs,
+    pagination,
   });
 }
 
@@ -28,4 +35,14 @@ export async function getLogById(req: Request, res: Response): Promise<void> {
   res.json({
     data: log,
   });
+}
+
+export async function createMultipleLogs(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  const { logs } = CreateMultipleLogsSchema.parse(req.body);
+  await logService.createMultipleLogs(logs);
+
+  res.status(201).json({ message: `${logs.length} logs créées avec succès` });
 }

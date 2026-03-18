@@ -1,5 +1,5 @@
 ### création log
-POST http://localhost:3500/api/logs
+POST http://localhost:4010/api/logs
 Content-Type: application/json
 
 {
@@ -9,7 +9,26 @@ Content-Type: application/json
 }
 
 ### récupération logs
-GET http://localhost:3500/api/logs
+GET http://localhost:4010/api/logs
 
 ### récupération log par id
-GET http://localhost:3500/api/logs/69b91bd27121891eaa8bb96d
+GET http://localhost:4010/api/logs/69b91bd27121891eaa8bb96d
+
+###
+POST http://localhost:4010/api/logs/batch
+Content-Type: application/json
+
+{
+  "logs": [
+    {
+      "level":"info",
+      "message": "coucou je suis un test",
+      "service": "oquiz-api"
+    },
+    {
+      "level":"info",
+      "message": "coucou je suis un second test",
+      "service": "oquiz-api"
+    }
+  ]
+}

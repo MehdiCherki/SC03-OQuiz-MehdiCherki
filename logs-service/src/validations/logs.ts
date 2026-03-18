@@ -34,10 +34,31 @@ export const CreateLogSchema = z.looseObject({
   timestamp: z.coerce.date().default(new Date()),
 });
 
+export const CreateMultipleLogsSchema = z.object({
+  logs: z
+    .array(CreateLogSchema)
+    .min(1)
+    .max(1000, "Maximum 1000 logs à la fois"),
+});
+
+export const LogFilterSchema = z.object({
+  service: z.string().optional(),
+  level: LogLevelSchema.optional(),
+  environment: z.string().optional(),
+  userId: z.coerce.number().optional(),
+  requestId: z.string().optional(),
+  sessionId: z.string().optional(),
+  limit: z.coerce.number().min(1).max(10000).default(100),
+  offset: z.coerce.number().min(0).default(0),
+  startDate: z.coerce.date().optional(),
+  endDate: z.coerce.date().optional(),
+});
+
 export type LogDocument = z.infer<typeof CreateLogSchema> & {
   _id: ObjectId;
   metadata?: any;
 };
 
 export type CreateLoqRequest = z.infer<typeof CreateLogSchema>;
+export type LogFilterRequest = z.infer<typeof LogFilterSchema>;
 export type LogLevel = z.infer<typeof LogLevelSchema>;
