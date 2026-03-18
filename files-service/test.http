@@ -1,0 +1,41 @@
+# ==============================================================================
+# Files Service — Tests manuels (REST Client / VS Code)
+# ==============================================================================
+# Usage :
+#   1. Lancer le serveur : npm run dev
+#   2. Remplacer le chemin de l'image ci-dessous par un fichier existant sur ta machine
+# ==============================================================================
+
+@baseUrl = http://localhost:4020/api
+
+# ==============================================================================
+# FILES
+# ==============================================================================
+
+### [POST] /files — Upload d'une image (multipart/form-data)
+POST {{baseUrl}}/files
+Content-Type: multipart/form-data; boundary=----boundary
+
+------boundary
+Content-Disposition: form-data; name="file"; filename="api-spa.png"
+Content-Type: image/png
+
+< ../docs/resources/screens/api-spa.png
+
+------boundary--
+
+###
+
+### [POST] /files — Upload d'un JPEG
+POST {{baseUrl}}/files
+Content-Type: multipart/form-data; boundary=----boundary
+
+------boundary
+Content-Disposition: form-data; name="file"; filename="agile.jpg"
+Content-Type: image/jpeg
+
+< ../docs/resources/screens/agile.jpg
+
+------boundary--
+
+###

@@ -7,6 +7,7 @@ export const uploadDir = path.join(import.meta.dirname, "../../uploads");
 export const formParser = formidable({
   uploadDir,
   keepExtensions: true,
+  createDirsFromUploads: true,
   filename(name, ext, part, form) {
     const currentDate = new Date();
     const newName = crypto.randomBytes(16).toString("hex");
