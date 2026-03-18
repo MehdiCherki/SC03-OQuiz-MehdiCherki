@@ -5,7 +5,7 @@ Content-Type: application/json
 {
   "level":"info",
   "message": "coucou je suis un test",
-  "service": "oquiz-api"
+  "service": "test"
 }
 
 ### récupération logs
