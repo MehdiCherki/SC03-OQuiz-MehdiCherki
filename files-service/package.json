@@ -5,6 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch --env-file=.env index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "docker:start": "npm run db:migrate:deploy && npm run start",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev --name auto && prisma generate",
     "db:migrate:reset": "prisma migrate reset --force",

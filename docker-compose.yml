@@ -1,42 +1,42 @@
 # Documentation de Docker compose : orchestration de conteneur
 # Sensible à l'indentation (comme en Python)
 
-services:                 # Liste des serveurs (nos conteneurs !)
-  database:                  # Nom de notre premier service (nom du conteneur dans le réseau !)
-    image: postgres:17       # Image permettant de créer le conteneur
-    restart: unless-stopped  # Redémarre automatiquement mon service en cas de crash (sauf si je l'ai éteint manuellement)
+services: # Liste des serveurs (nos conteneurs !)
+  database: # Nom de notre premier service (nom du conteneur dans le réseau !)
+    image: postgres:17 # Image permettant de créer le conteneur
+    restart: unless-stopped # Redémarre automatiquement mon service en cas de crash (sauf si je l'ai éteint manuellement)
     networks:
       - oquiz-network
     volumes:
-      - oquiz-volume:/var/lib/postgresql/data  # je monte mon volume oquiz-data dans mon conteneur, là où Postgres écrit par défaut ses données lorsqu'il manipule les tables
+      - oquiz-volume:/var/lib/postgresql/data # je monte mon volume oquiz-data dans mon conteneur, là où Postgres écrit par défaut ses données lorsqu'il manipule les tables
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-    ports:                   # Si on a besoin de pouvoir contacter la BDD depuis l'extérieur, on peut rajouter ce binding de port, sinon pas besoin
+    ports: # Si on a besoin de pouvoir contacter la BDD depuis l'extérieur, on peut rajouter ce binding de port, sinon pas besoin
       - ${POSTGRES_LOCAL_PORT}:5432
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 10s   # Fréquence des vérifications
-      timeout: 5s     # Délai max pour qu'une vérification réponde
-      retries: 5      # Nombre d'échecs consécutifs avant de passer en "unhealthy"
-      start_period: 20s  # Délai de grâce au démarrage (pas de pénalité si le check échoue)
+      interval: 10s # Fréquence des vérifications
+      timeout: 5s # Délai max pour qu'une vérification réponde
+      retries: 5 # Nombre d'échecs consécutifs avant de passer en "unhealthy"
+      start_period: 20s # Délai de grâce au démarrage (pas de pénalité si le check échoue)
 
   api:
-    build:                    # Plutôt que de partir d'une image existante, on demande à compose de générer l'image à partir de :
-      context: ./api          # ce dossier
-      dockerfile: Dockerfile  # ce Dockerfile
+    build: # Plutôt que de partir d'une image existante, on demande à compose de générer l'image à partir de :
+      context: ./api # ce dossier
+      dockerfile: Dockerfile # ce Dockerfile
     # image:                  # Pour partir d'une image existante, on pourrait plutôt utiliser cette syntaxe
     #   oquiz-api             # Nom de l'image de laquelle on part
-    restart: unless-stopped   # Redémarre automatiquement mon service en cas de crash (sauf si je l'ai éteint manuellement)
+    restart: unless-stopped # Redémarre automatiquement mon service en cas de crash (sauf si je l'ai éteint manuellement)
     environment:
       NODE_ENV: ${NODE_ENV}
       PORT: 3000
-      DATABASE_URL: ${DATABASE_URL}  # On lit directement dans le conteneur (database) puisqu'on est sur le meme network = le port 5432 j'ai accès depuis cet autre conteneur
+      DATABASE_URL: ${DATABASE_URL} # On lit directement dans le conteneur (database) puisqu'on est sur le meme network = le port 5432 j'ai accès depuis cet autre conteneur
       JWT_SECRET: ${JWT_SECRET}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
       LOG_LEVEL: ${LOG_LEVEL}
-      LOGS_SERVICE_HOST: logs-service  # Nom du service dans le réseau Docker
+      LOGS_SERVICE_HOST: logs-service # Nom du service dans le réseau Docker
       LOGS_SERVICE_PORT: 3500
     ports:
       - ${API_LOCAL_PORT}:3000
@@ -44,28 +44,28 @@ services:                 # Liste des serveurs (nos conteneurs !)
       - oquiz-network
     depends_on:
       database:
-        condition: service_healthy  # Attend que Postgres soit prêt avant de lancer les migrations
+        condition: service_healthy # Attend que Postgres soit prêt avant de lancer les migrations
       logs-service:
-        condition: service_healthy  # Attend que le service de logs soit prêt avant de démarrer
+        condition: service_healthy # Attend que le service de logs soit prêt avant de démarrer
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:3000/info || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 60s  # Délai plus long : migrations Prisma à exécuter au démarrage
+      start_period: 60s # Délai plus long : migrations Prisma à exécuter au démarrage
 
   client:
     build:
       context: ./client
       dockerfile: Dockerfile
-      args:  # équivalent du --build-arg
+      args: # équivalent du --build-arg
         - VITE_API_BASE_URL=${VITE_API_BASE_URL}
     restart: unless-stopped
     ports:
       - ${CLIENT_LOCAL_PORT}:80
     depends_on:
       api:
-        condition: service_healthy  # Attend que l'API soit prête avant de démarrer le client
+        condition: service_healthy # Attend que l'API soit prête avant de démarrer le client
     networks:
       - oquiz-network
     healthcheck:
@@ -95,14 +95,14 @@ services:                 # Liste des serveurs (nos conteneurs !)
     restart: unless-stopped
     environment:
       PORT: 3500
-      DATABASE_URL: ${LOGS_DATABASE_URL}  # URL de connexion MongoDB dans le réseau Docker
+      DATABASE_URL: ${LOGS_DATABASE_URL} # URL de connexion MongoDB dans le réseau Docker
     ports:
       - ${LOGS_SERVICE_LOCAL_PORT}:3500
     networks:
       - oquiz-network
     depends_on:
       logs-db:
-        condition: service_healthy  # Attend que MongoDB soit prêt avant de démarrer
+        condition: service_healthy # Attend que MongoDB soit prêt avant de démarrer
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:3500/api/logs || exit 1"]
       interval: 10s
@@ -113,19 +113,74 @@ services:                 # Liste des serveurs (nos conteneurs !)
   # Base de données MongoDB pour le service de logs
   logs-db:
     image: mongo:8
+    command: ["--quiet", "--logpath", "/dev/null"]
     restart: unless-stopped
     networks:
       - oquiz-network
     volumes:
-      - logs-volume:/data/db  # Persistance des logs MongoDB
+      - logs-volume:/data/db # Persistance des logs MongoDB
     ports:
       - ${LOGS_DB_LOCAL_PORT}:27017
     healthcheck:
-      test: ["CMD-SHELL", "mongosh --quiet --eval \"db.adminCommand('ping').ok\" | grep -q 1"]
+      test:
+        [
+          "CMD-SHELL",
+          'mongosh --quiet --eval "db.adminCommand(''ping'').ok" | grep -q 1',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 20s
+
+  # Base de données PostgreSQL dédiée au files-service
+  files-db:
+    image: postgres:17
+    restart: unless-stopped
+    networks:
+      - oquiz-network
+    volumes:
+      - files-db-volume:/var/lib/postgresql/data
+    ports:
+      - ${FILES_DB_LOCAL_PORT}:5432
+    environment:
+      POSTGRES_USER: ${FILES_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${FILES_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${FILES_POSTGRES_DB}
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${FILES_POSTGRES_USER} -d ${FILES_POSTGRES_DB}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # Service de gestion des fichiers (upload, transformation d'images)
+  files-service:
+    build:
+      context: ./files-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      PORT: 4020
+      DATABASE_URL: ${FILES_DATABASE_URL}
+    ports:
+      - ${FILES_SERVICE_LOCAL_PORT}:4020
+    volumes:
+      - files-uploads-volume:/app/uploads # Persistance des fichiers uploadés
+    networks:
+      - oquiz-network
+    depends_on:
+      files-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:4020/api/files || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
 
   # Reverse proxy nginx
   proxy:
@@ -148,11 +203,12 @@ services:                 # Liste des serveurs (nos conteneurs !)
     networks:
       - oquiz-network
 
-
-networks:        # Liste des réseaux
+networks: # Liste des réseaux
   oquiz-network: # Nom du réseau
 
-volumes:         # Liste de nos volumes
-  oquiz-volume:  # Volume pour la persistance des données de la BDD (sur l'hôte, au cas où le conteneur est supprimé, les données restent !)
-  logs-volume:   # Volume pour la persistance des logs MongoDB
+volumes: # Liste de nos volumes
+  oquiz-volume: # Volume pour la persistance des données de la BDD principale
+  logs-volume: # Volume pour la persistance des logs MongoDB
+  files-db-volume: # Volume pour la persistance des données de la BDD du files-service
+  files-uploads-volume: # Volume pour la persistance des fichiers uploadés
   # Note : on aurait pu mettre un dosier local comme `./oquiz-data` que l'on ajoute au gitignore
