@@ -9,7 +9,7 @@ Content-Type: application/json
 }
 
 ### récupération logs
-GET http://localhost:4010/api/logs
+GET http://localhost:4010/api/logs?endDate=2026-03-18&limit=2&offset=3
 
 ### récupération log par id
 GET http://localhost:4010/api/logs/69b91bd27121891eaa8bb96d
@@ -32,3 +32,6 @@ Content-Type: application/json
     }
   ]
 }
+
+### Récupération des stats
+GET http://localhost:4010/api/logs/stats

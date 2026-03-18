@@ -4,6 +4,7 @@ import {
   getLogs,
   getLogById,
   createMultipleLogs,
+  getLogsStats,
 } from "../controllers/logs.controller.ts";
 
 export const router = Router();
@@ -14,6 +15,9 @@ router.post("/logs/batch", createMultipleLogs);
 
 // Récupération des logs
 router.get("/logs", getLogs);
+
+// Récupération des stats
+router.get("/logs/stats", getLogsStats);
 
 // Récupération d'un log par son id
 router.get("/logs/:logId", getLogById);

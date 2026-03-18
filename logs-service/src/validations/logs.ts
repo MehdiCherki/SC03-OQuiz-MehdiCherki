@@ -54,6 +54,13 @@ export const LogFilterSchema = z.object({
   endDate: z.coerce.date().optional(),
 });
 
+export const LogStatsFilterSchema = z.object({
+  service: z.string().optional(),
+  environment: z.string().optional(),
+  startDate: z.coerce.date().optional(),
+  endDate: z.coerce.date().optional(),
+});
+
 export type LogDocument = z.infer<typeof CreateLogSchema> & {
   _id: ObjectId;
   metadata?: any;
@@ -61,4 +68,5 @@ export type LogDocument = z.infer<typeof CreateLogSchema> & {
 
 export type CreateLoqRequest = z.infer<typeof CreateLogSchema>;
 export type LogFilterRequest = z.infer<typeof LogFilterSchema>;
+export type LogStatsFilterRequest = z.infer<typeof LogStatsFilterSchema>;
 export type LogLevel = z.infer<typeof LogLevelSchema>;

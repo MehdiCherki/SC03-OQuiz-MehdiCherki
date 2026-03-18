@@ -4,6 +4,7 @@ import {
   CreateLogSchema,
   CreateMultipleLogsSchema,
   LogFilterSchema,
+  LogStatsFilterSchema,
 } from "../validations/logs.ts";
 import { IdParamSchema } from "../validations/utils.ts";
 import { NotFoundError } from "../lib/errors.ts";
@@ -45,4 +46,10 @@ export async function createMultipleLogs(
   await logService.createMultipleLogs(logs);
 
   res.status(201).json({ message: `${logs.length} logs créées avec succès` });
+}
+
+export async function getLogsStats(req: Request, res: Response): Promise<void> {
+  const filters = LogStatsFilterSchema.parse(req.query);
+  const stats = await logService.getLogsStats(filters);
+  res.json({ data: stats });
 }

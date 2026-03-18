@@ -4,7 +4,7 @@ import process from "node:process";
 
 export const logger = createLogger({
   level: config.logLevel || "info",
-  defaultMeta: { service: "oquiz" },
+  defaultMeta: { service: "oquiz", environment: process.env.NODE_ENV },
   format: format.combine(
     format.timestamp(),
     format.errors({ stack: true }),

@@ -4,6 +4,7 @@ import type {
   LogDocument,
   CreateLoqRequest,
   LogFilterRequest,
+  LogStatsFilterRequest,
 } from "../validations/logs.ts";
 
 export interface LogsWithPagination {
@@ -14,6 +15,23 @@ export interface LogsWithPagination {
     offset: number;
     hasNext: boolean;
     hasPrevious: boolean;
+  };
+}
+
+export interface LogStats {
+  totalLogs: number;
+  logsByLevel: {
+    error?: number;
+    warn?: number;
+    info?: number;
+    http?: number;
+  };
+  logsByService: {
+    oquiz?: number;
+  };
+  logsByEnvironment: {
+    development?: number;
+    production?: number;
   };
 }
 
@@ -87,4 +105,76 @@ export async function createMultipleLogs(logs: CreateLoqRequest[]) {
   }));
   const client = await getClient();
   await client.db().collection("logs").insertMany(improvedLogs);
+}
+
+export async function getLogsStats(
+  filters: LogStatsFilterRequest,
+): Promise<LogStats> {
+  const client = await getClient();
+  const collection = await client.db().collection("logs");
+
+  const mongoFilter: any = {};
+
+  if (filters.service) mongoFilter.service = filters.service;
+  if (filters.environment) mongoFilter.environment = filters.environment;
+
+  if (filters.startDate || filters.endDate) {
+    mongoFilter.timestamp = {};
+    if (filters.startDate) mongoFilter.timestamp.$gte = filters.startDate;
+    if (filters.endDate) mongoFilter.timestamp.$lt = filters.endDate;
+  }
+
+  const [totalLogs, logsByLevel, logsByService, logsByEnvironment] =
+    await Promise.all([
+      // nombre total de logs
+      collection.countDocuments(mongoFilter),
+      // répartition par niveau
+      collection
+        .aggregate([
+          { $match: mongoFilter },
+          { $group: { _id: "$level", count: { $sum: 1 } } },
+        ])
+        .toArray(),
+      // répartition par service
+      collection
+        .aggregate([
+          { $match: mongoFilter },
+          { $group: { _id: "$service", count: { $sum: 1 } } },
+        ])
+        .toArray(),
+      // répartition par environment
+      collection
+        .aggregate([
+          { $match: mongoFilter },
+          { $group: { _id: "$environment", count: { $sum: 1 } } },
+        ])
+        .toArray(),
+    ]);
+
+  const stats: LogStats = {
+    totalLogs,
+    logsByLevel: logsByLevel.reduce(
+      (acc, item) => {
+        acc[item._id] = item.count;
+        return acc;
+      },
+      {} as Record<string, number>,
+    ),
+    logsByService: logsByService.reduce(
+      (acc, item) => {
+        acc[item._id] = item.count;
+        return acc;
+      },
+      {} as Record<string, number>,
+    ),
+    logsByEnvironment: logsByEnvironment.reduce(
+      (acc, item) => {
+        acc[item._id] = item.count;
+        return acc;
+      },
+      {} as Record<string, number>,
+    ),
+  };
+
+  return stats;
 }
